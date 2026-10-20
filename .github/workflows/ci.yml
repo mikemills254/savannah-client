@@ -1,0 +1,41 @@
+# Lint, type-check and build on every pull request and push to master.
+# Deploys come from the hosting provider's Git integration (e.g. Vercel or
+# Netlify), which builds master once it's merged; this check gates the merge.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: Lint and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Type-check and build
+        run: npm run build
+        env:
+          # Any absolute URL works for a build check; the host sets the real one.
+          VITE_API_BASE_URL: https://api.example.com
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7

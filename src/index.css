@@ -1,0 +1,504 @@
+/* Tailwind without preflight: existing inline-styled pages keep their browser defaults */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+:root {
+  --primary: #351d5b;
+  --primary-content: #ffffff;
+  --primary-dark: #231240;
+  --primary-light: #5b3a94;
+
+  --secondary: #bada55;
+  --secondary-content: #1c2406;
+  --secondary-dark: #9cba2f;
+  --secondary-light: #d0e885;
+
+  --background: #f3f1f7;
+  --foreground: #fbfafd;
+  --border: #dcd8e5;
+
+  --copy: #1e1829;
+  --copy-light: #5e556e;
+  --copy-lighter: #877e98;
+
+  --success: #2ecf6a;
+  --warning: #f5c542;
+  --error: #ed3a3a;
+  --success-content: #03250f;
+  --warning-content: #251d03;
+  --error-content: #ffffff;
+
+  --code-bg: #eeeaf5;
+  --accent: #351d5b;
+  --accent-bg: rgba(53, 29, 91, 0.08);
+  --accent-border: rgba(53, 29, 91, 0.2);
+  --social-bg: rgba(238, 234, 245, 0.5);
+
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --heading: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  --shadow-sm: 0 2px 6px rgba(35, 18, 64, 0.05);
+  --shadow-md: 0 8px 24px rgba(35, 18, 64, 0.08);
+  --shadow-lg: 0 16px 36px rgba(35, 18, 64, 0.12);
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+/* ==========================================================================
+   Tailwind theme — brand tokens as utilities (bg-primary, text-copy-light…)
+   ========================================================================== */
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-content: var(--primary-content);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+  --color-secondary: var(--secondary);
+  --color-secondary-content: var(--secondary-content);
+  --color-secondary-dark: var(--secondary-dark);
+  --color-secondary-light: var(--secondary-light);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-copy: var(--copy);
+  --color-copy-light: var(--copy-light);
+  --color-copy-lighter: var(--copy-lighter);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-accent-bg: var(--accent-bg);
+  --color-accent-border: var(--accent-border);
+
+  /* Deep panel colour used by boards, the pill organizer and phones */
+  --color-ink: #12081f;
+  --color-ink-soft: #1b1029;
+  --color-lime-ink: #4d6410;
+  --color-error-ink: #b42323;
+
+  --font-mono: var(--mono);
+}
+
+@theme {
+  --font-serif: Georgia, 'Times New Roman', serif;
+  --font-script: 'Brush Script MT', 'Segoe Script', Georgia, serif;
+  --font-hand: 'Segoe Print', 'Bradley Hand', 'Comic Sans MS', cursive;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+
+  --shadow-sm: 0 2px 6px rgba(35, 18, 64, 0.05);
+  --shadow-md: 0 8px 24px rgba(35, 18, 64, 0.08);
+  --shadow-lg: 0 16px 36px rgba(35, 18, 64, 0.12);
+  --shadow-board: inset 0 0 0 4px rgba(255, 255, 255, 0.02), 0 24px 48px rgba(0, 0, 0, 0.3);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --animate-rise: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-pop: rise 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-shake: shake 0.45s ease both;
+  --animate-blink: blink 1.2s steps(2, jump-none) infinite;
+  --animate-caret: blink 1s steps(2, jump-none) infinite;
+  --animate-breathe: blink 1.6s ease-in-out infinite;
+  --animate-ecg: ecg 2.6s linear infinite;
+  --animate-sheen: sheen 7s ease-in-out infinite;
+  --animate-stamp: stamp 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-print: print 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-marquee: marquee 36s linear infinite;
+  --animate-tap: tap 0.3s ease;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      translate: 0 16px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  @keyframes shake {
+    0%, 100% { translate: 0 0; }
+    20% { translate: -8px 0; }
+    40% { translate: 7px 0; }
+    60% { translate: -5px 0; }
+    80% { translate: 3px 0; }
+  }
+
+  @keyframes blink {
+    50% { opacity: 0.2; }
+  }
+
+  @keyframes ecg {
+    to { transform: translateX(-50%); }
+  }
+
+  @keyframes sheen {
+    0%, 60% { translate: -100% 0; }
+    100% { translate: 100% 0; }
+  }
+
+  @keyframes stamp {
+    from {
+      opacity: 0;
+      scale: 2.2;
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+
+  @keyframes print {
+    from {
+      opacity: 0;
+      translate: 0 -6px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
+  }
+
+  @keyframes tap {
+    50% { scale: 0.92; }
+  }
+}
+
+/* ==========================================================================
+   Named textures — patterns too dense to read as arbitrary class values
+   ========================================================================== */
+
+/* Dot grid; tint with [--dot:…] and size with [--dot-size:…] */
+@utility bg-dots {
+  background-image: radial-gradient(var(--dot, rgba(255, 255, 255, 0.07)) 1px, transparent 1px);
+  background-size: var(--dot-size, 22px) var(--dot-size, 22px);
+}
+
+/* Ticket halves with punched notches; colour with [--ticket:…] */
+@utility ticket-top {
+  background:
+    radial-gradient(circle at 0 100%, transparent 12px, var(--ticket, #fff) 12.5px) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% 100%, transparent 12px, var(--ticket, #fff) 12.5px) right / 51% 100% no-repeat;
+}
+
+@utility ticket-bottom {
+  background:
+    radial-gradient(circle at 0 0, transparent 12px, var(--ticket, #fff) 12.5px) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% 0, transparent 12px, var(--ticket, #fff) 12.5px) right / 51% 100% no-repeat;
+}
+
+@utility ticket-sides {
+  background:
+    radial-gradient(circle at 0 50%, transparent 14px, var(--ticket, #fff) 14.5px) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% 50%, transparent 14px, var(--ticket, #fff) 14.5px) right / 51% 100% no-repeat;
+}
+
+@utility bg-night {
+  background:
+    radial-gradient(60rem 40rem at 85% -10%, rgba(186, 218, 85, 0.16), transparent 60%),
+    radial-gradient(40rem 30rem at -10% 110%, rgba(91, 58, 148, 0.6), transparent 60%),
+    var(--primary-dark);
+}
+
+@utility bg-night-glow {
+  background:
+    radial-gradient(50rem 30rem at 100% 0%, rgba(186, 218, 85, 0.12), transparent 60%),
+    var(--primary-dark);
+}
+
+@utility bg-card-patient {
+  background:
+    radial-gradient(18rem 12rem at 110% -20%, rgba(186, 218, 85, 0.35), transparent 60%),
+    linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 55%, var(--primary-dark) 100%);
+}
+
+@utility bg-card-clinic {
+  background:
+    radial-gradient(18rem 12rem at 110% -20%, rgba(255, 255, 255, 0.25), transparent 60%),
+    linear-gradient(135deg, #7d9a2a 0%, #4d6410 55%, #2c3a08 100%);
+}
+
+@utility bg-sheen {
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.14) 48%, transparent 60%);
+}
+
+/* Highlighter swipe behind inline text */
+@utility bg-highlight {
+  background: linear-gradient(transparent 60%, var(--secondary-light) 60%);
+}
+
+/* ECG paper behind the password meter */
+@utility bg-ecg-grid {
+  background:
+    repeating-linear-gradient(90deg, rgba(53, 29, 91, 0.07) 0 1px, transparent 1px 10px),
+    repeating-linear-gradient(0deg, rgba(53, 29, 91, 0.07) 0 1px, transparent 1px 8px);
+}
+
+/* Prescription pad paper and binding */
+@utility bg-ruled {
+  background:
+    repeating-linear-gradient(180deg, transparent 0 31px, rgba(53, 29, 91, 0.06) 31px 32px),
+    #fffefb;
+}
+
+@utility bg-binding {
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.5) 2px, transparent 2.5px) 10px 50% / 24px 100% repeat-x,
+    var(--primary);
+}
+
+/* Paper diary on the For Clinics page */
+@utility bg-diary {
+  background:
+    repeating-linear-gradient(180deg, transparent 0 33px, rgba(60, 120, 200, 0.2) 33px 34px) 0 2.6rem / 100% auto,
+    #fdf8e6;
+}
+
+/* Taken/booked slot */
+@utility bg-hatch {
+  background: repeating-linear-gradient(135deg, transparent 0 5px, rgba(53, 29, 91, 0.05) 5px 10px);
+}
+
+/* Hour grid behind a rota lane (10 columns) */
+@utility bg-rota-grid {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--background) 0 calc(10% - 1px),
+    var(--border) calc(10% - 1px) 10%
+  );
+}
+
+@utility fade-x {
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+@utility fade-down {
+  mask-image: linear-gradient(180deg, #000 0%, transparent 85%);
+}
+
+@utility fade-radial {
+  mask-image: radial-gradient(circle at 50% 50%, #000, transparent 75%);
+}
+
+@utility fade-radial-right {
+  mask-image: radial-gradient(circle at 70% 40%, #000, transparent 70%);
+}
+
+@utility select-chevron {
+  appearance: none;
+  padding-right: 2.5rem;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23877e98' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
+      right 1rem center no-repeat,
+    #ffffff;
+}
+
+/* ==========================================================================
+   Base — layered so Tailwind utilities can override it
+   ========================================================================== */
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--background);
+    color: var(--copy);
+    font-family: var(--sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--copy);
+    font-family: var(--heading);
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0;
+  }
+}
+
+/* ==========================================================================
+   Components — shared classes used across inline-styled and Tailwind pages
+   ========================================================================== */
+
+@layer components {
+  .site-container {
+    width: 100%;
+    max-width: 1160px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  @media (min-width: 640px) {
+    .site-container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    padding: 0.75rem 1.35rem;
+    border-radius: var(--radius-full);
+    border: 1px solid transparent;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    text-align: center;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .btn:active {
+    transform: scale(0.98);
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: var(--primary-content);
+    box-shadow: 0 4px 14px rgba(53, 29, 91, 0.25);
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-light);
+    box-shadow: 0 6px 20px rgba(53, 29, 91, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: var(--foreground);
+    color: var(--primary);
+    border-color: var(--border);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn-secondary:hover {
+    background: #ffffff;
+    border-color: var(--primary-light);
+    color: var(--primary-dark);
+    transform: translateY(-1px);
+  }
+
+  .btn-accent {
+    background: var(--secondary);
+    color: var(--secondary-content);
+    box-shadow: 0 4px 14px rgba(186, 218, 85, 0.35);
+  }
+
+  .btn-accent:hover {
+    background: var(--secondary-light);
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--copy);
+  }
+
+  .btn-ghost:hover {
+    background: var(--accent-bg);
+    color: var(--primary);
+  }
+
+  .feature-card {
+    background: var(--foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-border);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .badge-primary {
+    background: var(--accent-bg);
+    color: var(--primary);
+    border: 1px solid var(--accent-border);
+  }
+
+  .badge-secondary {
+    background: var(--secondary);
+    color: var(--secondary-content);
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: #ffffff;
+    color: var(--copy);
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--accent-bg);
+  }
+}
