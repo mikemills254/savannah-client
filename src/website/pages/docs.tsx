@@ -10,6 +10,7 @@ import CodeTour from '../sections/docs/codetour.tsx'
 import Accounts from '../sections/docs/accounts.tsx'
 import Roles from '../sections/docs/roles.tsx'
 import ApiReference from '../sections/docs/api.tsx'
+import Tests from '../sections/docs/tests.tsx'
 import Quality from '../sections/docs/quality.tsx'
 import Decisions from '../sections/docs/decisions.tsx'
 
@@ -24,7 +25,8 @@ const CONTENTS = [
     { id: 'accounts', label: 'Accounts & email' },
     { id: 'client', label: 'Web client' },
     { id: 'api', label: 'API reference' },
-    { id: 'quality', label: 'Security & testing' },
+    { id: 'tests', label: 'Tests' },
+    { id: 'quality', label: 'Security & delivery' },
     { id: 'decisions', label: 'Decisions' },
 ]
 
@@ -104,6 +106,7 @@ export function Docs() {
                         <Accounts />
                         <Roles />
                         <ApiReference />
+                        <Tests />
                         <Quality />
                         <Decisions />
                     </div>

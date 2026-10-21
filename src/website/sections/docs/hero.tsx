@@ -3,10 +3,11 @@ import { cn } from '../../../lib/cn.ts'
 import { swaggerUrl } from '../../../lib/docsLinks.ts'
 import { Accent, Eyebrow } from '../../../components/ui.tsx'
 import { heroAccent, heroActions, heroBtn, heroLede, heroSection, heroTitle } from '../../components/sectionStyles.ts'
+import { TEST_TOTAL } from './testSuite.ts'
 
 const STATS = [
     { value: '7 / 7', label: 'Functional requirements met' },
-    { value: '202', label: 'Automated tests on real PostgreSQL' },
+    { value: String(TEST_TOTAL), label: 'Automated tests on real PostgreSQL' },
     { value: '0', label: 'Double bookings under concurrent requests' },
     { value: '4', label: 'Roles, each with its own workspace' },
 ]
