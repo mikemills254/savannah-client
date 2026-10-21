@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { LuArrowRight } from 'react-icons/lu'
 import { useAuthStore } from '../../store/useAuthStore.ts'
@@ -9,7 +9,7 @@ import { UserRole } from '../../types/types.ts'
 import { cn } from '../../lib/cn.ts'
 import { Accent, Eyebrow } from '../../components/ui.tsx'
 import { PasswordInput } from './PasswordInput.tsx'
-import { AuthAlert, AuthTopbar } from './ui.tsx'
+import { AuthAlert, AuthTopbar, WebsiteLink } from './ui.tsx'
 import { authFieldError, authLabel, authRise, authSubmit } from './styles.ts'
 
 const MIN_PASSWORD = 8
@@ -153,9 +153,9 @@ export function AcceptInvite() {
             </div>
 
             <footer className="relative z-1 px-4 pb-6 text-center">
-                <Link to="/" className="text-[0.85rem] text-white/55 transition-colors duration-200 hover:text-white">
+                <WebsiteLink to="/" className="text-[0.85rem] text-white/55 transition-colors duration-200 hover:text-white">
                     &larr; Back to homepage
-                </Link>
+                </WebsiteLink>
             </footer>
         </div>
     )

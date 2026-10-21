@@ -7,11 +7,8 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-// https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  // The config runs before Vite loads .env, so read it here
   const { VITE_API_BASE_URL } = loadEnv(mode, __dirname)
-  // Just the server ("http://localhost:8000/api/v1" -> "http://localhost:8000")
   const target = /^https?:\/\//.test(VITE_API_BASE_URL ?? '') ? new URL(VITE_API_BASE_URL).origin : undefined
 
   return {

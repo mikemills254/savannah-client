@@ -51,12 +51,17 @@ function Schedule() {
     const today = clinicClock(now, tz).weekday
     const others = facilities.filter((f) => f.id !== facility.id)
 
-    // The doctor's shifts at their other facilities on a weekday, to avoid double-booking themselves
+    // The doctor's shifts at their other facilities on a weekday, to avoid double-booking themselves.
+    // Each is in its own clinic's time; the server refuses hours that really overlap.
     const elsewhere = (weekday: number) =>
         others.flatMap((other) =>
             (allHours[other.id] ?? [])
                 .filter((hour) => hour.weekday === weekday)
-                .map((hour) => `${other.name} ${shiftRange(hour)}`),
+                .map(
+                    (hour) =>
+                        `${other.name} ${shiftRange(hour)}` +
+                        (other.timezone !== tz ? ` (${other.timezone.replace(/_/g, ' ')} time)` : ''),
+                ),
         )
 
     return (

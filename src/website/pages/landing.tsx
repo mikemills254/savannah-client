@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchFacilities, type Facility } from '../../api/client.ts'
+import InstallBanner from '../../pwa/installBanner.tsx'
 import { useAuthStore } from '../../store/useAuthStore.ts'
 import { Navbar } from '../components/Navbar.tsx'
 import { Footer } from '../components/Footer.tsx'
@@ -51,6 +52,7 @@ function Landing() {
                 <Cta />
             </main>
             <Footer />
+            <InstallBanner />
         </div>
     )
 }

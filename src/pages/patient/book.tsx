@@ -135,7 +135,8 @@ export default function BookVisit() {
         if (!chosen) return
         setOutcome({ kind: 'booking' })
         const response = await handleBookAppointment(
-            { doctor_id: chosen.doctorId, starts_at: chosen.slot.starts_at },
+            // The clinic too: the doctor may work at several
+            { doctor_id: chosen.doctorId, starts_at: chosen.slot.starts_at, facility_id: chosen.facilityId },
             chosen.idempotencyKey,
         )
         if (response.success && response.data) {

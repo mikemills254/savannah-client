@@ -1,0 +1,22 @@
+{
+  "id": "/",
+  "name": "DocConnect",
+  "short_name": "DocConnect",
+  "description": "Book doctor visits at clinics and hospitals, and manage your clinic's schedule.",
+  "start_url": "/auth/login?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3f1f7",
+  "theme_color": "#351d5b",
+  "categories": ["medical", "health", "productivity"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Book a visit", "url": "/book", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "My visits", "url": "/visits", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

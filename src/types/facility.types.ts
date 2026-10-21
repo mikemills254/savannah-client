@@ -26,10 +26,12 @@ export interface IMemberCreated {
     invite_token: string | null
 }
 
-// A recurring weekly shift in the facility's local time
+// A recurring weekly shift in the facility's local time. A doctor at several
+// clinics has separate shifts at each, which never overlap.
 export interface IWorkingHour {
     id: string,
     doctor_id: string,
+    facility_id: string,
     // Monday = 0, Sunday = 6
     weekday: number,
     // "08:00:00"
@@ -92,9 +94,12 @@ export interface IDoctor {
     facility_id: string
 }
 
+// GET /doctors/{id}: facility and working_hours are for the clinic asked for
+// (or their first); facilities lists every clinic they can be booked at
 export interface IDoctorDetail extends IDoctor {
     facility: IFacilitySummary,
-    working_hours: IWorkingHour[]
+    working_hours: IWorkingHour[],
+    facilities: { facility: IFacilitySummary, working_hours: IWorkingHour[] }[]
 }
 
 export interface ISlot {
@@ -103,11 +108,15 @@ export interface ISlot {
     ends_at: string
 }
 
+// GET /doctors/{id}/availability. Without a clinic, a doctor at several gets
+// slots at all of them: facility_id and timezone are then null, and each slot
+// names its clinic.
 export interface IAvailability {
     doctor_id: string,
     date: string,
-    timezone: string,
-    available_slots: ISlot[]
+    facility_id: string | null,
+    timezone: string | null,
+    available_slots: (ISlot & { facility_id: string })[]
 }
 
 export interface IDoctorSlot extends ISlot {

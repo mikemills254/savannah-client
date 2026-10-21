@@ -3,6 +3,17 @@ import { Link } from 'react-router-dom'
 import { LuArrowRight, LuCircleAlert } from 'react-icons/lu'
 import { Logo } from '../../website/components/Logo.tsx'
 import { cn } from '../../lib/cn.ts'
+import { isStandalone } from '../../pwa/install.ts'
+
+// "Back to homepage" and other links to the website, hidden inside the installed app
+export function WebsiteLink({ to, className, children }: { to: string; className?: string; children: ReactNode }) {
+    if (isStandalone()) return null
+    return (
+        <Link to={to} className={className}>
+            {children}
+        </Link>
+    )
+}
 
 type Tone = 'light' | 'dark'
 
@@ -17,7 +28,8 @@ interface AuthTopbarProps {
 export function AuthTopbar({ tone, to, hint, label }: AuthTopbarProps) {
     return (
         <header className="relative z-[2] flex items-center justify-between gap-4 px-4 py-5 sm:px-8 sm:py-6">
-            <Link to="/" aria-label="Back to homepage">
+            {/* The installed app has no homepage, only sign-in */}
+            <Link to={isStandalone() ? '/auth/login' : '/'} aria-label={isStandalone() ? 'Sign in' : 'Back to homepage'}>
                 <Logo variant="horizontal" theme={tone === 'dark' ? 'white' : 'default'} height={34} />
             </Link>
             <Link

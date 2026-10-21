@@ -105,6 +105,19 @@ export function Navbar({ hasClinics = false }: NavbarProps) {
           >
             For clinics
           </Link>
+          <Link
+            to="/docs"
+            style={{
+              fontSize: '0.9375rem',
+              fontWeight: 500,
+              color: 'var(--copy-light)',
+              transition: 'color 0.2s',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--primary)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--copy-light)')}
+          >
+            Docs
+          </Link>
         </nav>
 
         {/* Desktop Auth CTAs */}
@@ -197,6 +210,13 @@ export function Navbar({ hasClinics = false }: NavbarProps) {
             style={{ padding: '0.5rem 0', color: 'var(--copy)', fontWeight: 500 }}
           >
             For clinics
+          </Link>
+          <Link
+            to="/docs"
+            onClick={closeMobileMenu}
+            style={{ padding: '0.5rem 0', color: 'var(--copy)', fontWeight: 500 }}
+          >
+            Docs
           </Link>
           <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '0.25rem 0' }} />
           {isAuthenticated ? (

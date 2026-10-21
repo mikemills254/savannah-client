@@ -16,6 +16,7 @@ import type {
     IAppointment,
     IAppointmentBooked,
     IMember,
+    IMemberCreated,
     IWorkingHour,
     IWorkingHourInput,
     StaffRole,
@@ -46,7 +47,8 @@ interface FacilityState {
     // An appointment as the server now has it, from a live update or a response
     applyAppointment: (appointment: IAppointment) => void
     // Returns an invite token when they have never set a password
-    addMember: (details: { name: string; email: string; role: StaffRole }) => Promise<string | null>
+    // A doctor who already works at another clinic is linked here with their existing account
+    addMember: (details: { name: string; email: string; role: StaffRole }) => Promise<IMemberCreated>
     setMemberActive: (id: string, isActive: boolean) => Promise<void>
     addShift: (doctorId: string, shift: IWorkingHourInput) => Promise<void>
     removeShift: (id: string) => Promise<void>
@@ -142,11 +144,11 @@ export const useFacilityStore = create<FacilityState>((set, get) => {
         },
 
         addMember: async ({ name, email, role }) => {
-            const { member, invite_token } = unwrap(
+            const created = unwrap(
                 await handleAddMember(requireFacility(), { email, role, name: name.trim() || undefined }),
             )
-            set((state) => ({ members: upsert(state.members, member) }))
-            return invite_token
+            set((state) => ({ members: upsert(state.members, created.member) }))
+            return created
         },
 
         setMemberActive: async (id, isActive) => {

@@ -5,7 +5,7 @@ import { Logo } from '../../website/components/Logo.tsx'
 import { LuArrowRight, LuCheck } from 'react-icons/lu'
 import { PasswordInput } from './PasswordInput.tsx'
 import { hashString } from './utils.ts'
-import { AuthAlert, AuthTopbar } from './ui.tsx'
+import { AuthAlert, AuthTopbar, WebsiteLink } from './ui.tsx'
 import {
     authFieldError as fieldErrorClass,
     authInlineLink,
@@ -518,9 +518,9 @@ export function Register() {
                                 Already have an account? <Link to="/auth/login">Log in</Link>
                             </p>
                             {isClinic ? (
-                                <Link to="/for-clinics" className="mt-3 inline-block text-[0.85rem] text-copy-lighter">
+                                <WebsiteLink to="/for-clinics" className="mt-3 inline-block text-[0.85rem] text-copy-lighter">
                                     &larr; How it works for clinics
-                                </Link>
+                                </WebsiteLink>
                             ) : (
                                 <p className={cn(switchClass, 'mt-2 text-[0.85rem]')}>
                                     Run a clinic? <Link to="/auth/register?as=clinic">Create a clinic space</Link>

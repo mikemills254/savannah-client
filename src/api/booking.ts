@@ -25,27 +25,42 @@ export const handleGetFacilityAvailability = (
         "Availability loaded",
     )
 
-// A bookable doctor with their facility and weekly hours; 404 once they stop taking bookings
-export const handleGetDoctor = (doctorId: string, signal?: AbortSignal): Promise<IApiResponse<IDoctorDetail>> =>
-    send(() => api.get<IDoctorDetail>(`/doctors/${doctorId}`, { signal }), "Doctor loaded")
+// A bookable doctor with their weekly hours at a clinic (facilityId, else their
+// first) and every clinic they work at; 404 once they stop taking bookings there
+export const handleGetDoctor = (
+    doctorId: string,
+    facilityId?: string,
+    signal?: AbortSignal,
+): Promise<IApiResponse<IDoctorDetail>> =>
+    send(
+        () => api.get<IDoctorDetail>(`/doctors/${doctorId}`, { params: { facility_id: facilityId }, signal }),
+        "Doctor loaded",
+    )
 
-// Free slots on a clinic-local date ("2026-10-20")
+// Free slots on a clinic-local date ("2026-10-20"), at one clinic or, without
+// facilityId, at each clinic the doctor works at
 export const handleGetAvailability = (
     doctorId: string,
     date: string,
+    facilityId?: string,
     signal?: AbortSignal,
 ): Promise<IApiResponse<IAvailability>> =>
     send(
-        () => api.get<IAvailability>(`/doctors/${doctorId}/availability`, { params: { date }, signal }),
+        () =>
+            api.get<IAvailability>(`/doctors/${doctorId}/availability`, {
+                params: { date, facility_id: facilityId },
+                signal,
+            }),
         "Availability loaded",
     )
 
 // --- Patient: their own visits ---
 
 // The same idempotencyKey must be sent again when retrying the same booking,
-// so a retry after a lost response returns the original booking
+// so a retry after a lost response returns the original booking. facility_id
+// says which clinic, for a doctor who works at several.
 export const handleBookAppointment = (
-    data: { doctor_id: string; starts_at: string },
+    data: { doctor_id: string; starts_at: string; facility_id?: string },
     idempotencyKey: string,
 ): Promise<IApiResponse<IAppointment>> =>
     send(

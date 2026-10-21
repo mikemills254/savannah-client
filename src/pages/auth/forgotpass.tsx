@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom'
 import { LuArrowRight, LuMailCheck } from 'react-icons/lu'
 import { useClock } from '../../hooks/useClock.ts'
 import { maskEmail } from './utils.ts'
-import { AuthAlert, AuthTopbar } from './ui.tsx'
+import { AuthAlert, AuthTopbar, WebsiteLink } from './ui.tsx'
 import { authLabel, authLinkBtn, authRise, authSubmit } from './styles.ts'
 import { Accent, Eyebrow } from '../../components/ui.tsx'
 import { cn } from '../../lib/cn.ts'
+import { handleForgotPassword } from '../../api/auth.ts'
 
 // --- Class strings ---
 
@@ -17,9 +18,12 @@ const doseKeyClass = cn(monoCaps, 'min-w-[6.5rem] text-[0.66rem] tracking-[0.12e
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const RESEND_COOLDOWN_S = 30
 
-// TODO: wire to the backend once it exposes a password-reset endpoint.
-// The API has no reset route yet, so this only simulates the request.
-const requestPasswordReset = () => new Promise<void>((resolve) => window.setTimeout(resolve, 900))
+// The API answers the same for known and unknown emails, so success here only
+// means the request was accepted; a 429 means too many links were asked for.
+const requestPasswordReset = async (email: string) => {
+    const results = await handleForgotPassword(email.trim())
+    if (!results.success) throw new Error(results.message)
+}
 
 export function ForgotPassword() {
     const [email, setEmail] = useState('')
@@ -37,7 +41,7 @@ export function ForgotPassword() {
 
         setIsLoading(true)
         try {
-            await requestPasswordReset()
+            await requestPasswordReset(email)
             setSentAt(Date.now())
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Could not send the reset link. Please try again.')
@@ -106,7 +110,8 @@ export function ForgotPassword() {
                                 </h2>
                                 <p className="m-0 text-[0.92rem] leading-[1.55] text-copy-light">
                                     If an account exists for <strong>{maskEmail(email)}</strong>, a reset link is on its
-                                    way. It can take a minute to arrive, so check spam too.
+                                    way. It works once, for 30 minutes. It can take a minute to arrive, so check spam
+                                    too.
                                 </p>
 
                                 <div className="mt-6 flex flex-col items-center gap-2">
@@ -178,9 +183,9 @@ export function ForgotPassword() {
                         )}
                     </div>
 
-                    <Link to="/" className="mt-3 inline-block text-[0.85rem] text-copy-lighter">
+                    <WebsiteLink to="/" className="mt-3 inline-block text-[0.85rem] text-copy-lighter">
                         &larr; Back to homepage
-                    </Link>
+                    </WebsiteLink>
                 </main>
             </div>
         </div>

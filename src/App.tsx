@@ -2,9 +2,11 @@ import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import Landing from './website/pages/landing.tsx'
 import ForClinics from './website/pages/ForClinics.tsx'
+import Docs from './website/pages/docs.tsx'
 import Login from './pages/auth/login.tsx'
 import Register from './pages/auth/register.tsx'
 import ForgotPassword from './pages/auth/forgotpass.tsx'
+import ResetPassword from './pages/auth/resetPassword.tsx'
 import TwoFactor from './pages/auth/2fa.tsx'
 import AcceptInvite from './pages/auth/acceptInvite.tsx'
 import AdminHome from './pages/admin/home.tsx'
@@ -19,6 +21,7 @@ import Settings from './pages/facility/pages/settings.tsx'
 import DoctorOverview from './pages/doctor/pages/overview.tsx'
 import DoctorSchedule from './pages/doctor/pages/schedule.tsx'
 import { UserRole } from './types/types.ts'
+import { BrowserOnlyRoute } from './pwa/browserOnlyRoute.tsx'
 import { PublicRoute } from './components/layout/publicRoute.tsx'
 import { FallbackRoute, PrivateRoute } from './components/layout/privateRoutes.tsx'
 
@@ -26,16 +29,23 @@ export default function App() {
     return (
         <BrowserRouter>
             <Routes>
+                {/* Documentation: open to everyone, signed in or not, and in the installed app */}
+                <Route path="/docs" element={<Docs />} />
+
                 {/* Public pages: signed-in users are sent to their home */}
                 <Route element={<PublicRoute />}>
-                    <Route path="/" element={<Landing />} />
-                    <Route path="/for-clinics" element={<ForClinics />} />
+                    {/* The website; the installed app goes straight to sign-in */}
+                    <Route element={<BrowserOnlyRoute />}>
+                        <Route path="/" element={<Landing />} />
+                        <Route path="/for-clinics" element={<ForClinics />} />
+                    </Route>
 
                     <Route path="/auth">
                         <Route index element={<Navigate to="login" replace />} />
                         <Route path="login" element={<Login />} />
                         <Route path="register" element={<Register />} />
                         <Route path="forgot-password" element={<ForgotPassword />} />
+                        <Route path="reset-password" element={<ResetPassword />} />
                         <Route path="verify" element={<TwoFactor />} />
                         <Route path="accept-invite" element={<AcceptInvite />} />
                     </Route>

@@ -88,6 +88,16 @@ export const handleAcceptInvite = async (data: { token: string, password: string
     }
 }
 
+// Asks for a reset email. The API answers the same whether or not the account
+// exists, so success only means the request was accepted.
+export const handleForgotPassword = (email: string): Promise<IApiResponse<{ detail: string }>> =>
+    send(() => api.post<{ detail: string }>("/auth/forgot-password", { email }), "Reset link requested")
+
+// Sets a new password from the emailed link and logs the user in. 400 means the
+// link is invalid, expired or already used.
+export const handleResetPassword = (data: { token: string, password: string }): Promise<IApiResponse<IAuthResponse>> =>
+    send(() => api.post<IAuthResponse>("/auth/reset-password", data), "Password reset")
+
 export const handleGetFacility = (facilityId: string): Promise<IApiResponse<IFacility>> =>
     send(() => api.get<IFacility>(`/facilities/${facilityId}`), "Facility loaded")
 

@@ -12,7 +12,7 @@ import { hashString } from './utils.ts'
 import { barcode } from '../../lib/barcode.ts'
 import { cn } from '../../lib/cn.ts'
 import { Accent, Eyebrow } from '../../components/ui.tsx'
-import { AuthAlert, AuthTopbar } from './ui.tsx'
+import { AuthAlert, AuthTopbar, WebsiteLink } from './ui.tsx'
 import { authFieldError, authInlineLink, authInput, authLabel, authRise, authSubmit } from './styles.ts'
 import type { ILogin } from '../../types/auth.types.ts'
 
@@ -244,9 +244,9 @@ export function Login() {
             </div>
 
             <footer className="relative z-1 px-4 pb-6 text-center">
-                <Link to="/" className="text-[0.85rem] text-white/55 transition-colors duration-200 hover:text-white">
+                <WebsiteLink to="/" className="text-[0.85rem] text-white/55 transition-colors duration-200 hover:text-white">
                     &larr; Back to homepage
-                </Link>
+                </WebsiteLink>
             </footer>
         </div>
     )

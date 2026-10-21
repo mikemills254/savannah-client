@@ -23,7 +23,8 @@ interface ReschedulePanelProps {
 export default function ReschedulePanel({ appointment, onMove, onClose }: ReschedulePanelProps) {
     const now = useClock(30_000)
     const tz = appointment.facility.timezone
-    const { doctor, loading, error: doctorError } = useDoctorDetail(appointment.doctor.id)
+    // A visit moves within its own clinic: the doctor's hours and free slots there
+    const { doctor, loading, error: doctorError } = useDoctorDetail(appointment.doctor.id, appointment.facility.id)
 
     const [dayKey, setDayKey] = useState<string | null>(null)
     const [cell, setCell] = useState<SlotCell | null>(null)
@@ -39,7 +40,7 @@ export default function ReschedulePanel({ appointment, onMove, onClose }: Resche
         days.find((d) => d.key === dayKey && isWorking(d.weekday)) ??
         days.find((d) => d.key === clinicClock(appointment.starts_at, tz).day && isWorking(d.weekday)) ??
         days.find((d) => isWorking(d.weekday))
-    const availability = useAvailability(doctor ? doctor.id : null, day?.key ?? null)
+    const availability = useAvailability(doctor ? doctor.id : null, day?.key ?? null, appointment.facility.id)
     const cells = day ? slotCells(slotMinutes(hours, day.weekday), availability.slots, day.key, now, tz) : []
     const picked = cell && cell.slot && day?.key === dayKey ? cell : null
 

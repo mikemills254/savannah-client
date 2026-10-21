@@ -5,6 +5,7 @@ import {
     handleGetMe,
     handleGoogleLogin,
     handleLogin,
+    handleResetPassword,
     handleSignUp,
 } from '../api/auth.ts'
 import type { IAuthUser, ILogin, IRegister } from '../types/auth.types.ts'
@@ -29,6 +30,8 @@ interface AuthState {
     loginWithGoogle: (idToken: string) => Promise<IAuthUser>
     register: (payload: IRegister) => Promise<IAuthUser>
     acceptInvite: (data: { token: string; password: string }) => Promise<IAuthUser>
+    // A token from a password reset email
+    resetPassword: (data: { token: string; password: string }) => Promise<IAuthUser>
     logout: () => void
     initialize: () => Promise<void>
     refreshUser: () => Promise<void>
@@ -113,6 +116,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             }
 
             // Accepting an invite logs the user in, like sign-up
+            const { access_token } = results.data
+            const user = await withFacilities(results.data.user)
+            localStorage.setItem('token', access_token)
+            set({ token: access_token, user, isAuthenticated: true })
+            return user
+        } finally {
+            set({ isLoading: false })
+        }
+    },
+
+    resetPassword: async (data) => {
+        set({ isLoading: true })
+        try {
+            const results = await handleResetPassword(data)
+            if (!results.success || !results.data) {
+                throw new Error(results.message)
+            }
+
+            // A reset logs the user in with the new password, like accepting an invite
             const { access_token } = results.data
             const user = await withFacilities(results.data.user)
             localStorage.setItem('token', access_token)

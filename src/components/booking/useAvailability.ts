@@ -9,10 +9,11 @@ interface Result {
     error: string | null
 }
 
-// A doctor's free slots on a clinic-local day. While a newer request is in
-// flight the previous slots for the same day stay on screen (loading is true),
-// so a refresh doesn't blank the grid.
-export function useAvailability(doctorId: string | null, day: string | null) {
+// A doctor's free slots on a clinic-local day at one clinic (a doctor can work
+// at several, and a booking at one blocks the same time at the others). While a
+// newer request is in flight the previous slots for the same day stay on
+// screen (loading is true), so a refresh doesn't blank the grid.
+export function useAvailability(doctorId: string | null, day: string | null, facilityId: string | null) {
     const [version, setVersion] = useState(0)
     const [result, setResult] = useState<Result | null>(null)
 
@@ -21,7 +22,7 @@ export function useAvailability(doctorId: string | null, day: string | null) {
         const controller = new AbortController()
         const key = `${doctorId}|${day}|${version}`
 
-        handleGetAvailability(doctorId, day, controller.signal).then((response) => {
+        handleGetAvailability(doctorId, day, facilityId ?? undefined, controller.signal).then((response) => {
             if (controller.signal.aborted) return
             setResult({
                 key,
@@ -30,7 +31,7 @@ export function useAvailability(doctorId: string | null, day: string | null) {
             })
         })
         return () => controller.abort()
-    }, [doctorId, day, version])
+    }, [doctorId, day, version, facilityId])
 
     const dayKey = doctorId && day ? `${doctorId}|${day}|` : null
     const sameDay = dayKey !== null && result !== null && result.key.startsWith(dayKey)

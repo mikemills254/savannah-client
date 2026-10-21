@@ -1,9 +1,10 @@
-/* Tailwind without preflight: existing inline-styled pages keep their browser defaults */
 @layer theme, base, components, utilities;
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities);
 
 :root {
+  color-scheme: light;
+
   --primary: #351d5b;
   --primary-content: #ffffff;
   --primary-dark: #231240;
@@ -125,10 +126,12 @@
       translate: 0 -6px;
       background-color: color-mix(in srgb, var(--color-secondary) 55%, transparent);
     }
+
     12% {
       opacity: 1;
       translate: 0 0;
     }
+
     100% {
       background-color: transparent;
     }
@@ -139,6 +142,7 @@
       opacity: 0;
       translate: 0 16px;
     }
+
     to {
       opacity: 1;
       translate: 0 0;
@@ -146,24 +150,51 @@
   }
 
   @keyframes shake {
-    0%, 100% { translate: 0 0; }
-    20% { translate: -8px 0; }
-    40% { translate: 7px 0; }
-    60% { translate: -5px 0; }
-    80% { translate: 3px 0; }
+
+    0%,
+    100% {
+      translate: 0 0;
+    }
+
+    20% {
+      translate: -8px 0;
+    }
+
+    40% {
+      translate: 7px 0;
+    }
+
+    60% {
+      translate: -5px 0;
+    }
+
+    80% {
+      translate: 3px 0;
+    }
   }
 
   @keyframes blink {
-    50% { opacity: 0.2; }
+    50% {
+      opacity: 0.2;
+    }
   }
 
   @keyframes ecg {
-    to { transform: translateX(-50%); }
+    to {
+      transform: translateX(-50%);
+    }
   }
 
   @keyframes sheen {
-    0%, 60% { translate: -100% 0; }
-    100% { translate: 100% 0; }
+
+    0%,
+    60% {
+      translate: -100% 0;
+    }
+
+    100% {
+      translate: 100% 0;
+    }
   }
 
   @keyframes stamp {
@@ -171,6 +202,7 @@
       opacity: 0;
       scale: 2.2;
     }
+
     to {
       opacity: 1;
       scale: 1;
@@ -182,6 +214,7 @@
       opacity: 0;
       translate: 0 -6px;
     }
+
     to {
       opacity: 1;
       translate: 0 0;
@@ -189,11 +222,15 @@
   }
 
   @keyframes marquee {
-    to { transform: translateX(-50%); }
+    to {
+      transform: translateX(-50%);
+    }
   }
 
   @keyframes tap {
-    50% { scale: 0.92; }
+    50% {
+      scale: 0.92;
+    }
   }
 }
 
@@ -294,11 +331,9 @@
 
 /* Hour grid behind a rota lane (10 columns) */
 @utility bg-rota-grid {
-  background: repeating-linear-gradient(
-    90deg,
-    var(--background) 0 calc(10% - 1px),
-    var(--border) calc(10% - 1px) 10%
-  );
+  background: repeating-linear-gradient(90deg,
+      var(--background) 0 calc(10% - 1px),
+      var(--border) calc(10% - 1px) 10%);
 }
 
 @utility fade-x {
@@ -321,8 +356,7 @@
   appearance: none;
   padding-right: 2.5rem;
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23877e98' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
-      right 1rem center no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23877e98' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") right 1rem center no-repeat,
     #ffffff;
 }
 
@@ -331,7 +365,10 @@
    ========================================================================== */
 
 @layer base {
-  *, *::before, *::after {
+
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
   }
 
@@ -367,7 +404,12 @@
     outline-offset: 2px;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     color: var(--copy);
     font-family: var(--heading);
     font-weight: 700;

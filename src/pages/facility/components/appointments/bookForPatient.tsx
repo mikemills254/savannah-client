@@ -76,7 +76,7 @@ export default function BookForPatient({ doctors, onClose }: BookForPatientProps
     const days = upcomingDays(now, timeZone)
     const isWorking = (weekday: number) => slotMinutes(hours, weekday).length > 0
     const day = days.find((d) => d.key === dayKey && isWorking(d.weekday)) ?? days.find((d) => isWorking(d.weekday))
-    const availability = useAvailability(doctorId || null, day?.key ?? null)
+    const availability = useAvailability(doctorId || null, day?.key ?? null, facilityId)
     const cells = day ? slotCells(slotMinutes(hours, day.weekday), availability.slots, day.key, now, timeZone) : []
     // A pick that has since been taken isn't a pick any more
     const chosen = cell && cells.find((c) => c.minutes === cell.minutes && c.state === 'open') ? cell : null

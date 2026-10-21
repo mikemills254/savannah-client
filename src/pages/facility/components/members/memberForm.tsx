@@ -21,6 +21,8 @@ export default function MemberForm({ role, members, onClose }: MemberFormProps) 
     const [submitting, setSubmitting] = useState(false)
     // Shown once they're added, if they still need to set a password
     const [invite, setInvite] = useState<{ token: string; name: string } | null>(null)
+    // Shown once a doctor who already works at another clinic is linked here
+    const [linked, setLinked] = useState<string | null>(null)
 
     const noun = role === UserRole.DOCTOR ? 'doctor' : 'admin'
 
@@ -37,14 +39,33 @@ export default function MemberForm({ role, members, onClose }: MemberFormProps) 
         setSubmitting(true)
         setError(null)
         try {
-            const token = await addMember({ name, email: normalized, role })
-            if (token) setInvite({ token, name: existing?.name ?? name.trim() })
+            const { member, invite_token } = await addMember({ name, email: normalized, role })
+            if (invite_token) setInvite({ token: invite_token, name: member.name })
+            // New to this clinic but already signed up: a doctor from another clinic
+            else if (!existing && member.has_password) setLinked(member.name)
             else onClose()
         } catch (err) {
             setError(err instanceof Error ? err.message : `Couldn't add the ${noun}`)
         } finally {
             setSubmitting(false)
         }
+    }
+
+    if (linked) {
+        return (
+            <div className="flex flex-col gap-3">
+                <div role="status" className="rounded-md border border-accent-border bg-accent-bg px-4 py-3 text-sm text-copy">
+                    <p className="m-0 font-semibold text-primary">{linked} has joined your clinic</p>
+                    <p className="m-0 mt-1 text-copy-light">
+                        They already use DocConnect at another clinic, so they keep their account and sign in as usual.
+                        We've emailed them to set their hours here; until then patients can't book them at your clinic.
+                    </p>
+                </div>
+                <button type="button" onClick={onClose} className="btn btn-ghost self-start">
+                    Done
+                </button>
+            </div>
+        )
     }
 
     if (invite) {
@@ -101,7 +122,9 @@ export default function MemberForm({ role, members, onClose }: MemberFormProps) 
             )}
             <p className="m-0 mt-3 text-xs text-copy-lighter">
                 They set their own password from an invite link. Adding someone who was deactivated restores their
-                account and history.
+                account and history.{' '}
+                {role === UserRole.DOCTOR &&
+                    'A doctor who already works at another clinic keeps their account and is linked to yours, with separate hours here.'}
             </p>
         </form>
     )
