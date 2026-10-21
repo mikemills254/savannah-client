@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom'
 import { LuLogOut, LuMenu } from 'react-icons/lu'
+import LiveBadge from '../../../../components/live/liveBadge.tsx'
 import { initials } from '../../../../lib/initials.ts'
 import { useAuthStore } from '../../../../store/useAuthStore.ts'
 import type { IAuthUser } from '../../../../types/auth.types.ts'
-import { UserRole } from '../../../../types/types.ts'
 
 interface NavbarProps {
     user: IAuthUser | null
@@ -33,13 +33,13 @@ export default function Navbar({ user, title, onMenuClick }: NavbarProps) {
 
             <h1 className="min-w-0 flex-1 truncate text-base font-bold sm:text-lg">{title}</h1>
 
+            <LiveBadge />
+
             {user && (
                 <div className="flex items-center gap-3">
                     <div className="hidden text-right sm:block">
                         <p className="m-0 text-sm font-semibold text-copy">{user.name}</p>
-                        <p className="m-0 text-xs text-copy-light">
-                            {user.role === UserRole.DOCTOR ? 'Doctor' : 'Clinic admin'}
-                        </p>
+                        <p className="m-0 text-xs text-copy-light">Clinic admin</p>
                     </div>
                     <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-content">
                         {initials(user.name)}

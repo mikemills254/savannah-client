@@ -1,3 +1,4 @@
+import type { IFacility } from './auth.types'
 import type { UserRole } from './types'
 
 export type AppointmentStatus = 'BOOKED' | 'CANCELLED'
@@ -13,13 +14,15 @@ export interface IMember {
     role: StaffRole,
     // False once deactivated: they can't log in and a doctor takes no new bookings. History is kept
     is_active: boolean,
+    // False until they accept their invite; they can't log in before then
+    has_password: boolean,
     created_at: string
 }
 
 // POST /facilities/{id}/members
 export interface IMemberCreated {
     member: IMember,
-    // Set when they have never set a password; they use it on /accept-invite
+    // Set when they have never set a password; they use it on /auth/accept-invite
     invite_token: string | null
 }
 
@@ -105,4 +108,35 @@ export interface IAvailability {
     date: string,
     timezone: string,
     available_slots: ISlot[]
+}
+
+export interface IDoctorSlot extends ISlot {
+    doctor_id: string
+}
+
+// A clinic in GET /facilities, with its soonest free slot in the next 14 days
+export interface IBookableFacility extends IFacility {
+    next_available: IDoctorSlot | null
+}
+
+// GET /facilities/{id}/availability: every active doctor's free slots, day by day
+export interface IFacilityAvailability {
+    facility_id: string,
+    timezone: string,
+    // Clinic-local dates, both inclusive
+    from: string,
+    to: string,
+    next_available: IDoctorSlot | null,
+    // One per day in the range, including days with nothing open
+    days: { date: string, open_count: number }[],
+    // Sorted by name
+    doctors: IDoctorAvailability[]
+}
+
+export interface IDoctorAvailability {
+    doctor_id: string,
+    name: string,
+    next_available: ISlot | null,
+    // One per day in the range; empty when nothing is free
+    days: { date: string, available_slots: ISlot[] }[]
 }

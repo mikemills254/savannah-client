@@ -1,3 +1,5 @@
+import { API_BASE_URL as API_BASE } from '../lib/api'
+
 export interface Facility {
   id: string
   name: string
@@ -19,8 +21,6 @@ export interface TokenResponse {
   access_token: string
   token_type: string
 }
-
-const API_BASE = import.meta.env.VITE_API_URL || ''
 
 export async function fetchFacilities(): Promise<Facility[]> {
   try {

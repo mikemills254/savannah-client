@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../../store/useAuthStore.ts'
+import { useHomePath } from '../../hooks/useHomePath.ts'
 import { Logo } from './Logo.tsx'
 import { LuMenu, LuX, LuArrowRight } from 'react-icons/lu'
 
@@ -12,6 +13,7 @@ export function Navbar({ hasClinics = false }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const logout = useAuthStore((s) => s.logout)
+  const home = useHomePath()
 
   const toggleMobileMenu = () => setMobileMenuOpen((prev) => !prev)
   const closeMobileMenu = () => setMobileMenuOpen(false)
@@ -109,7 +111,7 @@ export function Navbar({ hasClinics = false }: NavbarProps) {
         <div style={{ display: 'none', alignItems: 'center', gap: '0.85rem' }} className="desktop-ctas">
           {isAuthenticated ? (
             <>
-              <Link to="/dashboard" className="btn btn-primary" style={{ padding: '0.6rem 1.25rem', fontSize: '0.875rem' }}>
+              <Link to={home} className="btn btn-primary" style={{ padding: '0.6rem 1.25rem', fontSize: '0.875rem' }}>
                 Go to dashboard
                 <LuArrowRight style={{ width: '1rem', height: '1rem' }} />
               </Link>
@@ -124,10 +126,10 @@ export function Navbar({ hasClinics = false }: NavbarProps) {
             </>
           ) : (
             <>
-              <Link to="/login" className="btn btn-ghost" style={{ padding: '0.6rem 1.1rem', fontSize: '0.875rem' }}>
+              <Link to="/auth/login" className="btn btn-ghost" style={{ padding: '0.6rem 1.1rem', fontSize: '0.875rem' }}>
                 Log in
               </Link>
-              <Link to="/register" className="btn btn-primary" style={{ padding: '0.6rem 1.25rem', fontSize: '0.875rem' }}>
+              <Link to="/auth/register" className="btn btn-primary" style={{ padding: '0.6rem 1.25rem', fontSize: '0.875rem' }}>
                 Create free account
               </Link>
             </>
@@ -199,7 +201,7 @@ export function Navbar({ hasClinics = false }: NavbarProps) {
           <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '0.25rem 0' }} />
           {isAuthenticated ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <Link to="/dashboard" onClick={closeMobileMenu} className="btn btn-primary" style={{ width: '100%' }}>
+              <Link to={home} onClick={closeMobileMenu} className="btn btn-primary" style={{ width: '100%' }}>
                 Go to dashboard
               </Link>
               <button
@@ -216,10 +218,10 @@ export function Navbar({ hasClinics = false }: NavbarProps) {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <Link to="/register" onClick={closeMobileMenu} className="btn btn-primary" style={{ width: '100%' }}>
+              <Link to="/auth/register" onClick={closeMobileMenu} className="btn btn-primary" style={{ width: '100%' }}>
                 Create free account
               </Link>
-              <Link to="/login" onClick={closeMobileMenu} className="btn btn-secondary" style={{ width: '100%' }}>
+              <Link to="/auth/login" onClick={closeMobileMenu} className="btn btn-secondary" style={{ width: '100%' }}>
                 Log in
               </Link>
             </div>

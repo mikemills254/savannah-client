@@ -3,24 +3,22 @@ import type { IconType } from 'react-icons'
 import { LuCalendarDays, LuClock, LuLayoutDashboard, LuSettings, LuStethoscope, LuX } from 'react-icons/lu'
 import { Logo } from '../../../../website/components/Logo.tsx'
 import type { IAuthUser } from '../../../../types/auth.types.ts'
-import { UserRole } from '../../../../types/types.ts'
 import { cn } from '../../../../lib/cn.ts'
+import { homeFacility } from '../../../../lib/staffFacility.ts'
 
 interface NavItem {
     to: string
     label: string
-    // Doctors see a shorter menu, worded for their own schedule
-    doctorLabel?: string
     icon: IconType
-    adminOnly?: boolean
 }
 
-const links: NavItem[] = [
-    { to: '/dashboard', label: 'Overview', icon: LuLayoutDashboard },
-    { to: '/dashboard/doctors', label: 'Doctors', icon: LuStethoscope, adminOnly: true },
-    { to: '/dashboard/appointments', label: 'Appointments', doctorLabel: 'My appointments', icon: LuCalendarDays },
-    { to: '/dashboard/hours', label: 'Working hours', doctorLabel: 'My hours', icon: LuClock },
-    { to: '/dashboard/settings', label: 'Settings', icon: LuSettings, adminOnly: true },
+// Facility pages live under the facility's id, e.g. /:facilityId/dashboard/doctors
+const navLinks = (facilityId: string | null): NavItem[] => [
+    { to: `/${facilityId}/dashboard`, label: 'Overview', icon: LuLayoutDashboard },
+    { to: `/${facilityId}/dashboard/doctors`, label: 'Doctors', icon: LuStethoscope },
+    { to: `/${facilityId}/dashboard/appointments`, label: 'Appointments', icon: LuCalendarDays },
+    { to: `/${facilityId}/dashboard/hours`, label: 'Working hours', icon: LuClock },
+    { to: `/${facilityId}/dashboard/settings`, label: 'Settings', icon: LuSettings },
 ]
 
 interface SidebarProps {
@@ -31,8 +29,7 @@ interface SidebarProps {
 
 // Fixed on large screens, a slide-in drawer below that
 export default function Sidebar({ user, open, onClose }: SidebarProps) {
-    const isDoctor = user?.role === UserRole.DOCTOR
-    const facility = user?.facility ?? null
+    const facility = homeFacility(user)
 
     return (
         <>
@@ -67,9 +64,7 @@ export default function Sidebar({ user, open, onClose }: SidebarProps) {
 
                 <nav className="flex-1 overflow-y-auto p-3">
                     <ul className="m-0 flex list-none flex-col gap-1 p-0">
-                        {links
-                            .filter((link) => !(isDoctor && link.adminOnly))
-                            .map(({ to, label, doctorLabel, icon: Icon }) => (
+                        {navLinks(facility?.id ?? null).map(({ to, label, icon: Icon }) => (
                                 <li key={to}>
                                     <NavLink
                                         to={to}
@@ -85,7 +80,7 @@ export default function Sidebar({ user, open, onClose }: SidebarProps) {
                                         }
                                     >
                                         <Icon className="size-[18px] shrink-0" />
-                                        {(isDoctor && doctorLabel) || label}
+                                        {label}
                                     </NavLink>
                                 </li>
                             ))}

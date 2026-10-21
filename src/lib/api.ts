@@ -1,10 +1,17 @@
 import axios, { AxiosError } from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
 
-// An empty base URL keeps requests same-origin, so in dev they go through the
-// Vite proxy (/auth, /facilities → FastAPI). Set VITE_API_BASE_URL in production.
+// VITE_API_BASE_URL is the API's full URL, e.g. http://localhost:8000/api/v1.
+// In dev only its path is used: requests stay same-origin and the Vite proxy
+// forwards /api to the server, so no CORS setup is needed locally.
+const configuredBase = import.meta.env.VITE_API_BASE_URL ?? ''
+export const API_BASE_URL =
+    import.meta.env.DEV && /^https?:\/\//.test(configuredBase)
+        ? new URL(configuredBase).pathname.replace(/\/$/, '')
+        : configuredBase
+
 export const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL ?? '',
+    baseURL: API_BASE_URL,
     timeout: 15_000,
     headers: {
         'Content-Type': 'application/json',

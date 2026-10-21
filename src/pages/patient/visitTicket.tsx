@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { LuMapPin, LuStethoscope, LuUserCheck } from 'react-icons/lu'
 import { barcode } from '../../lib/barcode.ts'
 import { cn } from '../../lib/cn.ts'
@@ -5,25 +6,29 @@ import { initials } from '../../lib/initials.ts'
 import type { IAppointment } from '../../types/facility.types.ts'
 import { hashString } from '../auth/utils.ts'
 import CancelVisitButton from '../facility/components/ui/cancelVisitButton.tsx'
-import { dayHeading, formatDate, formatTime } from '../facility/utils/clinicTime.ts'
-import { countdown, staffName, visitCode } from './visitTime.ts'
+import { dayHeading, formatDate, formatTime, visitWhen } from '../facility/utils/clinicTime.ts'
+import { countdown, PATIENT_CANCEL_REASONS, staffName, visitCode } from './visitTime.ts'
 
 interface VisitTicketProps {
     appointment: IAppointment
     now: Date
     // Set while the CANCELLED stamp plays, before the visit moves to history
     stamped?: boolean
-    onCancel: (reason: string) => Promise<void>
+    onCancel: (reason: string) => Promise<unknown>
 }
 
-// The next visit, as a ticket: the details on top, a tear-off stub below
+// A visit as a ticket: the details on top, a tear-off stub below. Cancelled
+// ones carry the stamp; only one that hasn't started can be moved or cancelled.
 export default function VisitTicket({ appointment, now, stamped = false, onCancel }: VisitTicketProps) {
     const tz = appointment.facility.timezone
     const code = visitCode(appointment)
     const bars = barcode(hashString(appointment.id), 34)
     const bookedBy = staffName(appointment, appointment.booked_by)
+    const cancelled = appointment.status === 'CANCELLED'
     const started = new Date(appointment.starts_at) <= now
+    const ended = new Date(appointment.ends_at) <= now
     const soon = new Date(appointment.starts_at).getTime() - now.getTime() < 24 * 60 * 60_000
+    const changeable = !cancelled && !started && !stamped
 
     return (
         <article className="relative animate-rise drop-shadow-[0_18px_30px_rgba(35,18,64,0.14)] motion-reduce:animate-none">
@@ -36,10 +41,20 @@ export default function VisitTicket({ appointment, now, stamped = false, onCance
                     <span
                         className={cn(
                             'rounded-full px-2.5 py-1 font-sans text-xs font-bold tracking-normal normal-case',
-                            soon ? 'bg-secondary text-secondary-content' : 'bg-accent-bg text-primary',
+                            cancelled || ended
+                                ? 'bg-background text-copy-lighter'
+                                : soon
+                                  ? 'bg-secondary text-secondary-content'
+                                  : 'bg-accent-bg text-primary',
                         )}
                     >
-                        {started ? 'Happening now' : countdown(appointment.starts_at, now)}
+                        {cancelled
+                            ? 'Cancelled'
+                            : ended
+                              ? 'Done'
+                              : started
+                                ? 'Happening now'
+                                : countdown(appointment.starts_at, now)}
                     </span>
                 </div>
 
@@ -90,13 +105,23 @@ export default function VisitTicket({ appointment, now, stamped = false, onCance
                     ) : (
                         <span className="text-xs text-copy-lighter">Arrive a few minutes early.</span>
                     )}
-                    {!started && !stamped && (
-                        <CancelVisitButton
-                            label="Cancel visit"
-                            placeholder="Why are you giving this slot up?"
-                            confirmLabel="Yes, cancel"
-                            onConfirm={onCancel}
-                        />
+                    {changeable && (
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Link
+                                to={`/visits/${appointment.id}?move=1`}
+                                className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:border-primary-light"
+                            >
+                                Reschedule
+                            </Link>
+                            <CancelVisitButton
+                                label="Cancel visit"
+                                placeholder="Let the clinic know why, e.g. I'm travelling that week"
+                                confirmLabel="Cancel visit"
+                                details={`${appointment.doctor.name} · ${visitWhen(appointment.starts_at, tz)} · ${appointment.facility.name}`}
+                                reasons={PATIENT_CANCEL_REASONS}
+                                onConfirm={onCancel}
+                            />
+                        </div>
                     )}
                 </div>
             </div>
@@ -116,7 +141,7 @@ export default function VisitTicket({ appointment, now, stamped = false, onCance
                 </div>
             </div>
 
-            {stamped && (
+            {(stamped || cancelled) && (
                 <div className="pointer-events-none absolute inset-0 grid place-items-center" role="status">
                     <span className="-rotate-12 animate-stamp rounded-md border-4 border-error bg-white/80 px-5 py-2 font-mono text-3xl font-extrabold tracking-[0.2em] text-error-ink motion-reduce:animate-none sm:text-4xl">
                         CANCELLED

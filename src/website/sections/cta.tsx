@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../../store/useAuthStore.ts'
+import { useHomePath } from '../../hooks/useHomePath.ts'
 import { LuArrowRight } from 'react-icons/lu'
 import { cn } from '../../lib/cn.ts'
 import { Accent, Eyebrow } from '../../components/ui.tsx'
@@ -13,6 +14,7 @@ const ticket =
 
 export function Cta() {
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+    const home = useHomePath()
 
     return (
         <section className={ctaSection} aria-labelledby="cta-band-heading">
@@ -29,12 +31,12 @@ export function Cta() {
                         </Lede>
 
                         {isAuthenticated ? (
-                            <Link to="/dashboard" className={cn('btn btn-accent', ctaBtn)}>
+                            <Link to={home} className={cn('btn btn-accent', ctaBtn)}>
                                 Go to dashboard
                                 <LuArrowRight size={18} />
                             </Link>
                         ) : (
-                            <Link to="/register" className={cn('btn btn-accent', ctaBtn)}>
+                            <Link to="/auth/register" className={cn('btn btn-accent', ctaBtn)}>
                                 Create free account
                                 <LuArrowRight size={18} />
                             </Link>

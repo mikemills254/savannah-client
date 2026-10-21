@@ -12,7 +12,7 @@ interface InviteLinkProps {
 // sending yet, so staff copy it and pass it on.
 export default function InviteLink({ token, name }: InviteLinkProps) {
     const [copied, setCopied] = useState(false)
-    const url = `${window.location.origin}/accept-invite?token=${encodeURIComponent(token)}`
+    const url = `${window.location.origin}/auth/accept-invite?token=${encodeURIComponent(token)}`
     const firstName = name.split(' ')[0]
 
     const copy = async () => {

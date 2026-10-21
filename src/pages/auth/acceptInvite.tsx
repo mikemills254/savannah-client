@@ -3,6 +3,8 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { LuArrowRight } from 'react-icons/lu'
 import { useAuthStore } from '../../store/useAuthStore.ts'
+import { homePath } from '../../lib/homePath.ts'
+import { homeFacility } from '../../lib/staffFacility.ts'
 import { UserRole } from '../../types/types.ts'
 import { cn } from '../../lib/cn.ts'
 import { Accent, Eyebrow } from '../../components/ui.tsx'
@@ -37,10 +39,16 @@ export function AcceptInvite() {
         setSubmitting(true)
         try {
             const user = await acceptInvite({ token, password })
+            const facility = homeFacility(user)
             toast.success(
-                user.role === UserRole.PATIENT ? 'Welcome! Your visits are waiting.' : `Welcome to ${user.facility?.name ?? 'the team'}!`,
+                user.role === UserRole.PATIENT ? 'Welcome! Your visits are waiting.' : `Welcome to ${facility?.name ?? 'the team'}!`,
             )
-            navigate('/dashboard', { replace: true })
+            // A new doctor sets their hours first: patients can't book them without any
+            const next =
+                user.role === UserRole.DOCTOR && facility
+                    ? `/doctor/hours?facility=${facility.id}&setup=1`
+                    : homePath(user)
+            navigate(next, { replace: true })
         } catch (err) {
             setError(err instanceof Error ? err.message : 'This invite could not be used.')
             setShake(true)
@@ -51,7 +59,7 @@ export function AcceptInvite() {
 
     return (
         <div className="relative flex min-h-dvh flex-col overflow-hidden bg-night text-white before:pointer-events-none before:absolute before:inset-0 before:bg-dots before:fade-down">
-            <AuthTopbar tone="dark" to="/login" hint="Already set up?" label="Log in" />
+            <AuthTopbar tone="dark" to="/auth/login" hint="Already set up?" label="Log in" />
 
             <div className="relative z-1 mx-auto grid w-full max-w-270 flex-1 items-center gap-10 px-4 pt-4 pb-8 min-[960px]:grid-cols-[1.05fr_0.95fr] min-[960px]:gap-16 min-[960px]:px-8 min-[960px]:pb-12">
                 <section>

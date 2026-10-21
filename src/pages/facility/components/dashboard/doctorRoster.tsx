@@ -3,6 +3,7 @@ import { cn } from '../../../../lib/cn.ts'
 import type { DutyState, RosterEntry } from '../../utils/schedule.ts'
 import Avatar from '../ui/avatar.tsx'
 import Panel from '../ui/panel.tsx'
+import { useFacilityStore } from '../../store/useFacilityStore.ts'
 
 // Who's around now first, deactivated accounts last
 const order: DutyState[] = ['on-duty', 'later', 'finished', 'off', 'no-hours', 'inactive']
@@ -23,6 +24,7 @@ interface DoctorRosterProps {
 }
 
 export default function DoctorRoster({ roster, canManage }: DoctorRosterProps) {
+    const facilityId = useFacilityStore((s) => s.facilityId)
     const sorted = [...roster].sort((a, b) => order.indexOf(a.duty.state) - order.indexOf(b.duty.state))
 
     return (
@@ -30,7 +32,7 @@ export default function DoctorRoster({ roster, canManage }: DoctorRosterProps) {
             title={canManage ? 'Doctors today' : 'Your day'}
             action={
                 canManage && (
-                    <Link to="/dashboard/doctors" className="text-sm font-semibold text-primary hover:underline">
+                    <Link to={`/${facilityId}/dashboard/doctors`} className="text-sm font-semibold text-primary hover:underline">
                         Manage
                     </Link>
                 )
@@ -65,7 +67,7 @@ export default function DoctorRoster({ roster, canManage }: DoctorRosterProps) {
 
                             {duty.state === 'no-hours' && (
                                 <Link
-                                    to={`/dashboard/hours?doctor=${doctor.id}`}
+                                    to={`/${facilityId}/dashboard/hours?doctor=${doctor.id}`}
                                     className="shrink-0 rounded-full bg-warning/20 px-2.5 py-1 text-xs font-semibold text-warning-content hover:bg-warning/30"
                                 >
                                     Add hours

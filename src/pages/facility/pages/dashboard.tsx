@@ -27,8 +27,6 @@ function Overview() {
     const appointments = useFacilityStore((s) => s.appointments)
     const { now, timeZone } = useClinicNow()
 
-    // A doctor's data is already just their own
-    const isAdmin = user?.role === UserRole.FACILITY_ADMIN
     const doctors = members.filter((member) => member.role === UserRole.DOCTOR)
     const today = clinicClock(now, timeZone).day
     const todays = appointments
@@ -45,7 +43,7 @@ function Overview() {
             <div className="grid gap-6 lg:grid-cols-3">
                 <TodaySchedule className="lg:col-span-2" appointments={todays} now={now} timeZone={timeZone} />
                 <div className="flex flex-col gap-6">
-                    <DoctorRoster roster={roster} canManage={isAdmin} />
+                    <DoctorRoster roster={roster} canManage />
                     <WeekAhead appointments={appointments} now={now} timeZone={timeZone} />
                 </div>
             </div>

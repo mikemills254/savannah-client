@@ -25,7 +25,7 @@ export function ClinicHero() {
                         </p>
 
                         <div className={heroActions}>
-                            <Link to="/register?as=clinic" className={cn('btn btn-primary', heroBtn)}>
+                            <Link to="/auth/register?as=clinic" className={cn('btn btn-primary', heroBtn)}>
                                 Apply for a clinic space
                                 <LuArrowRight size={18} />
                             </Link>

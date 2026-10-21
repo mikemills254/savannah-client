@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useClock } from '../../hooks/useClock.ts'
 import { Logo } from '../../website/components/Logo.tsx'
 import { LuArrowRight, LuCheck } from 'react-icons/lu'
@@ -18,6 +18,9 @@ import { Accent, Eyebrow } from '../../components/ui.tsx'
 import { cn } from '../../lib/cn.ts'
 import { useFormik, type FormikErrors } from 'formik'
 import { useAuthStore } from '../../store/useAuthStore.ts'
+import { HomeRedirect } from '../../components/layout/privateRoutes.tsx'
+import GoogleSignIn from '../../components/googleSignIn.tsx'
+import { homePath } from '../../lib/homePath.ts'
 import type { IRegister } from '../../types/auth.types.ts'
 
 // --- Class strings ---
@@ -220,9 +223,9 @@ export function Register() {
             }
 
             try {
-                // Sign-up also logs in; /dashboard then shows the facility or patient dashboard by role
-                await register(payload)
-                navigate('/dashboard', { replace: true })
+                // Sign-up also logs in, so go straight to the new user's home
+                const user = await register(payload)
+                navigate(homePath(user), { replace: true })
             } catch (err: unknown) {
                 const message =
                     err instanceof Error
@@ -240,7 +243,7 @@ export function Register() {
 
     // Hooks above must always run, so this early return lives after them
     if (startedAuthed) {
-        return <Navigate to="/dashboard" replace />
+        return <HomeRedirect />
     }
 
     const { values, isSubmitting } = formik
@@ -281,9 +284,9 @@ export function Register() {
     return (
         <div className="flex min-h-dvh flex-col bg-background">
             {isClinic ? (
-                <AuthTopbar tone="light" to="/register" hint="Booking for yourself?" label="Patient sign-up" />
+                <AuthTopbar tone="light" to="/auth/register" hint="Booking for yourself?" label="Patient sign-up" />
             ) : (
-                <AuthTopbar tone="light" to="/login" hint="Already a patient?" label="Log in" />
+                <AuthTopbar tone="light" to="/auth/login" hint="Already a patient?" label="Log in" />
             )}
 
             <div className="mx-auto grid w-full max-w-295 flex-1 gap-8 px-4 pt-1 pb-10 min-[960px]:grid-cols-2 min-[960px]:gap-14 min-[960px]:px-8 min-[960px]:pb-8">
@@ -502,8 +505,17 @@ export function Register() {
                                 </button>
                             </form>
 
+                            {/* Google creates patient accounts only, so clinics sign up with the form */}
+                            {!isClinic && (
+                                <GoogleSignIn
+                                    text="signup_with"
+                                    onSignedIn={(user) => navigate(homePath(user), { replace: true })}
+                                    onError={setError}
+                                />
+                            )}
+
                             <p className={cn(switchClass, 'mt-6 text-[0.9rem]')}>
-                                Already have an account? <Link to="/login">Log in</Link>
+                                Already have an account? <Link to="/auth/login">Log in</Link>
                             </p>
                             {isClinic ? (
                                 <Link to="/for-clinics" className="mt-3 inline-block text-[0.85rem] text-copy-lighter">
@@ -511,7 +523,7 @@ export function Register() {
                                 </Link>
                             ) : (
                                 <p className={cn(switchClass, 'mt-2 text-[0.85rem]')}>
-                                    Run a clinic? <Link to="/register?as=clinic">Create a clinic space</Link>
+                                    Run a clinic? <Link to="/auth/register?as=clinic">Create a clinic space</Link>
                                 </p>
                             )}
                         </>

@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import toast from 'react-hot-toast'
+import InviteLink from '../../../components/inviteLink.tsx'
+import { homeFacility } from '../../../lib/staffFacility.ts'
 import { useAuthStore } from '../../../store/useAuthStore.ts'
+import type { IMember } from '../../../types/facility.types.ts'
 import { UserRole } from '../../../types/types.ts'
+import { InvitePendingPill, ReissueInviteButton } from '../components/doctors/doctorRow.tsx'
 import Wrapper from '../components/layout/wrapper.tsx'
 import MemberForm from '../components/members/memberForm.tsx'
 import Avatar from '../components/ui/avatar.tsx'
@@ -20,14 +24,65 @@ function Detail({ label, value }: { label: string; value: string }) {
     )
 }
 
+function AdminRow({ admin }: { admin: IMember }) {
+    const setMemberActive = useFacilityStore((s) => s.setMemberActive)
+    const facilityId = useFacilityStore((s) => s.facilityId)
+    const [inviteToken, setInviteToken] = useState<string | null>(null)
+    const firstName = admin.name.split(' ')[0]
+    const pending = admin.is_active && admin.has_password === false
+
+    return (
+        <li className="flex flex-wrap items-center gap-3 py-3">
+            <Avatar name={admin.name} muted={!admin.is_active} />
+            <div className="min-w-0 flex-1">
+                <p className="m-0 flex items-center gap-2 text-sm font-semibold text-copy">
+                    <span className="truncate">{admin.name}</span>
+                    {pending && <InvitePendingPill />}
+                </p>
+                <p className="m-0 truncate text-xs text-copy-light">{admin.email}</p>
+            </div>
+            {admin.is_active ? (
+                <div className="flex flex-wrap items-center gap-2">
+                    {pending && (
+                        <ReissueInviteButton facilityId={facilityId} member={admin} onIssued={setInviteToken} />
+                    )}
+                    <ConfirmButton
+                        label="Remove"
+                        question={`Remove ${firstName}?`}
+                        confirmLabel="Remove"
+                        onConfirm={() => setMemberActive(admin.id, false)}
+                    />
+                </div>
+            ) : (
+                <button
+                    type="button"
+                    onClick={() =>
+                        setMemberActive(admin.id, true).then(
+                            () => toast.success(`${firstName} is an admin again`),
+                            (error: Error) => toast.error(error.message),
+                        )
+                    }
+                    className="rounded-full border border-border bg-transparent px-3 py-1.5 text-xs font-semibold text-primary hover:border-primary-light"
+                >
+                    Restore
+                </button>
+            )}
+            {pending && inviteToken && (
+                <div className="basis-full pl-12">
+                    <InviteLink token={inviteToken} name={admin.name} />
+                </div>
+            )}
+        </li>
+    )
+}
+
 export default function Settings() {
     const user = useAuthStore((s) => s.user)
     const members = useFacilityStore((s) => s.members)
-    const setMemberActive = useFacilityStore((s) => s.setMemberActive)
     const { timeZone } = useClinicNow()
     const [adding, setAdding] = useState(false)
 
-    const facility = user?.facility
+    const facility = homeFacility(user)
     const admins = members
         .filter((member) => member.role === UserRole.FACILITY_ADMIN && member.id !== user?.id)
         .sort((a, b) => Number(b.is_active) - Number(a.is_active) || a.name.localeCompare(b.name))
@@ -102,34 +157,7 @@ export default function Settings() {
                             )}
 
                             {admins.map((admin) => (
-                                <li key={admin.id} className="flex flex-wrap items-center gap-3 py-3">
-                                    <Avatar name={admin.name} muted={!admin.is_active} />
-                                    <div className="min-w-0 flex-1">
-                                        <p className="m-0 truncate text-sm font-semibold text-copy">{admin.name}</p>
-                                        <p className="m-0 truncate text-xs text-copy-light">{admin.email}</p>
-                                    </div>
-                                    {admin.is_active ? (
-                                        <ConfirmButton
-                                            label="Remove"
-                                            question={`Remove ${admin.name.split(' ')[0]}?`}
-                                            confirmLabel="Remove"
-                                            onConfirm={() => setMemberActive(admin.id, false)}
-                                        />
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                setMemberActive(admin.id, true).then(
-                                                    () => toast.success(`${admin.name.split(' ')[0]} is an admin again`),
-                                                    (error: Error) => toast.error(error.message),
-                                                )
-                                            }
-                                            className="rounded-full border border-border bg-transparent px-3 py-1.5 text-xs font-semibold text-primary hover:border-primary-light"
-                                        >
-                                            Restore
-                                        </button>
-                                    )}
-                                </li>
+                                <AdminRow key={admin.id} admin={admin} />
                             ))}
                         </ul>
                     </Panel>

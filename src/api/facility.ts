@@ -92,3 +92,14 @@ export const handleReissuePatientInvite = (
         () => api.post<{ invite_token: string }>(`/facilities/${facilityId}/patients/${patientId}/invite`),
         "New invite ready",
     )
+
+// A fresh invite for a member who hasn't set a password yet; doctors are emailed it too.
+// 409 once they have one
+export const handleReissueMemberInvite = (
+    facilityId: string,
+    memberId: string,
+): Promise<IApiResponse<{ invite_token: string }>> =>
+    send(
+        () => api.post<{ invite_token: string }>(`/facilities/${facilityId}/members/${memberId}/invite`),
+        "New invite ready",
+    )

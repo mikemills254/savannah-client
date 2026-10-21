@@ -115,6 +115,24 @@
   --animate-print: print 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-marquee: marquee 36s linear infinite;
   --animate-tap: tap 0.3s ease;
+  /* A row someone else just changed: drops in lit up, then fades to normal.
+     backwards, not both: the fill mustn't outlast it and cover hover styles */
+  --animate-arrive: arrive 3s ease-out backwards;
+
+  @keyframes arrive {
+    0% {
+      opacity: 0;
+      translate: 0 -6px;
+      background-color: color-mix(in srgb, var(--color-secondary) 55%, transparent);
+    }
+    12% {
+      opacity: 1;
+      translate: 0 0;
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
 
   @keyframes rise {
     from {

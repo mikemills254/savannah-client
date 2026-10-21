@@ -44,8 +44,8 @@ export function Footer() {
             <a href="#how-it-works" style={{ transition: 'color 0.2s' }}>How it works</a>
             <a href="#why-reliable" style={{ transition: 'color 0.2s' }}>Why it's reliable</a>
             <Link to="/for-clinics" style={{ transition: 'color 0.2s' }}>For clinics</Link>
-            <Link to="/register" style={{ transition: 'color 0.2s' }}>Create free account</Link>
-            <Link to="/login" style={{ transition: 'color 0.2s' }}>Log in</Link>
+            <Link to="/auth/register" style={{ transition: 'color 0.2s' }}>Create free account</Link>
+            <Link to="/auth/login" style={{ transition: 'color 0.2s' }}>Log in</Link>
           </nav>
         </div>
 

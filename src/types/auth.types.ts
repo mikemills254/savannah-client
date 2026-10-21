@@ -31,8 +31,8 @@ export interface IAuthUser {
     created_at: string,
     // Set for FACILITY_ADMIN and DOCTOR, null otherwise
     facility_id: string | null,
-    // The staff member's facility
-    facility: IFacility | null
+    // Every facility the staff member works at; a doctor can work at several
+    facilities: IFacility[]
 }
 
 // Body of POST /auth/register and /auth/login

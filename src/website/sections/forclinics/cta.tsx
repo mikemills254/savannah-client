@@ -25,7 +25,7 @@ export function ClinicCta() {
                             Create your admin account and tell us about your clinic. We review every application, then
                             your team can start taking bookings.
                         </Lede>
-                        <Link to="/register?as=clinic" className={cn('btn btn-accent', ctaBtn)}>
+                        <Link to="/auth/register?as=clinic" className={cn('btn btn-accent', ctaBtn)}>
                             Apply for a clinic space
                             <LuArrowRight size={18} />
                         </Link>

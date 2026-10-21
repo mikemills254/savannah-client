@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../../store/useAuthStore.ts'
+import { useHomePath } from '../../hooks/useHomePath.ts'
 import { LuArrowRight, LuLock, LuShieldCheck } from 'react-icons/lu'
 import { cn } from '../../lib/cn.ts'
 import { Accent, Eyebrow, LiveBadge } from '../../components/ui.tsx'
@@ -40,6 +41,7 @@ const footIcon = 'shrink-0 text-secondary-dark'
 
 export function Hero() {
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+    const home = useHomePath()
     const [day, setDay] = useState(1)
     const [slot, setSlot] = useState<number | null>(null)
 
@@ -70,17 +72,17 @@ export function Hero() {
 
                         <div className={heroActions}>
                             {isAuthenticated ? (
-                                <Link to="/dashboard" className={cn('btn btn-primary', heroBtn)}>
+                                <Link to={home} className={cn('btn btn-primary', heroBtn)}>
                                     Go to dashboard
                                     <LuArrowRight size={18} />
                                 </Link>
                             ) : (
                                 <>
-                                    <Link to="/register" className={cn('btn btn-primary', heroBtn)}>
+                                    <Link to="/auth/register" className={cn('btn btn-primary', heroBtn)}>
                                         Create free account
                                         <LuArrowRight size={18} />
                                     </Link>
-                                    <Link to="/login" className={cn('btn btn-secondary', heroBtn)}>
+                                    <Link to="/auth/login" className={cn('btn btn-secondary', heroBtn)}>
                                         Log in
                                     </Link>
                                 </>

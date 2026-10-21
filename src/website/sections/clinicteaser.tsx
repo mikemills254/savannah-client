@@ -35,7 +35,7 @@ export function ClinicTeaser() {
                     </ul>
 
                     <div className="mt-8 flex flex-wrap gap-3">
-                        <Link to="/register?as=clinic" className="btn btn-primary">
+                        <Link to="/auth/register?as=clinic" className="btn btn-primary">
                             Apply for a clinic space
                             <LuArrowRight size={18} />
                         </Link>

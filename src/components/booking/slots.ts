@@ -35,6 +35,19 @@ export function upcomingDays(now: Date, timeZone: string, count = BOOKING_DAYS):
     })
 }
 
+// A clinic-local date from the API ("2026-10-20") as a day tab. Noon UTC keeps the
+// calendar date the same whatever the browser's timezone.
+export function bookingDay(key: string): BookingDay {
+    const date = new Date(`${key}T12:00:00Z`)
+    return {
+        key,
+        weekday: (date.getUTCDay() + 6) % 7,
+        label: formatDate(date, 'UTC', { weekday: 'short' }),
+        date: date.getUTCDate(),
+        month: formatDate(date, 'UTC', { month: 'short' }),
+    }
+}
+
 // Start of every slot (minutes after the clinic's midnight) in a doctor's shifts on a weekday
 export function slotMinutes(hours: IWorkingHour[], weekday: number): number[] {
     const starts: number[] = []

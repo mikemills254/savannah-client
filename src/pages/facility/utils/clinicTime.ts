@@ -69,6 +69,12 @@ export function formatDate(date: Date, timeZone: string, options: Intl.DateTimeF
     return new Intl.DateTimeFormat('en-GB', { timeZone, ...options }).format(date)
 }
 
+// "Sat 24 Oct, 13:00", in the clinic's time
+export function visitWhen(startsAt: string, timeZone: string): string {
+    const day = formatDate(new Date(startsAt), timeZone, { weekday: 'short', day: 'numeric', month: 'short' })
+    return `${day}, ${formatTime(startsAt, timeZone)}`
+}
+
 // "Today", "Tomorrow", "Yesterday", otherwise "Tue 20 Oct"
 export function dayHeading(date: Date | string, now: Date, timeZone: string): string {
     const day = clinicClock(date, timeZone).day

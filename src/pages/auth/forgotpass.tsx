@@ -56,7 +56,7 @@ export function ForgotPassword() {
 
     return (
         <div className="flex min-h-dvh flex-col bg-background">
-            <AuthTopbar tone="light" to="/login" hint="Remembered it?" label="Log in" />
+            <AuthTopbar tone="light" to="/auth/login" hint="Remembered it?" label="Log in" />
 
             <div className="grid flex-1 place-items-center px-4 pt-2 pb-12">
                 <main className={cn('w-full max-w-[460px]', authRise)}>
@@ -110,7 +110,7 @@ export function ForgotPassword() {
                                 </p>
 
                                 <div className="mt-6 flex flex-col items-center gap-2">
-                                    <Link to="/login" className={cn('btn btn-primary', authSubmit)}>
+                                    <Link to="/auth/login" className={cn('btn btn-primary', authSubmit)}>
                                         Back to log in
                                         <LuArrowRight size={18} />
                                     </Link>

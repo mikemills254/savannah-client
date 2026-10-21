@@ -1,7 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom'
+import DayRow from '../../../components/schedule/dayRow.tsx'
 import { UserRole } from '../../../types/types.ts'
 import Wrapper from '../components/layout/wrapper.tsx'
-import DayRow from '../components/workingHours/dayRow.tsx'
 import Panel from '../components/ui/panel.tsx'
 import { useClinicNow } from '../hooks/useClinicNow.ts'
 import { useFacilityStore } from '../store/useFacilityStore.ts'
@@ -11,6 +11,9 @@ import { WEEKDAY_NAMES, weeklyMinutes } from '../utils/schedule.ts'
 export default function WorkingHours() {
     const members = useFacilityStore((s) => s.members)
     const workingHours = useFacilityStore((s) => s.workingHours)
+    const facilityId = useFacilityStore((s) => s.facilityId)
+    const addShift = useFacilityStore((s) => s.addShift)
+    const removeShift = useFacilityStore((s) => s.removeShift)
     const { now, timeZone } = useClinicNow()
     // The doctor lives in the URL so the Doctors page can link straight to them
     const [params, setParams] = useSearchParams()
@@ -27,7 +30,7 @@ export default function WorkingHours() {
                 <Panel>
                     <p className="m-0 py-10 text-center text-sm text-copy-light">
                         Add a doctor before setting working hours.{' '}
-                        <Link to="/dashboard/doctors" className="font-semibold text-primary hover:underline">
+                        <Link to={`/${facilityId}/dashboard/doctors`} className="font-semibold text-primary hover:underline">
                             Go to Doctors
                         </Link>
                     </p>
@@ -82,11 +85,12 @@ export default function WorkingHours() {
                             <DayRow
                                 // Keyed by doctor too, so a half-filled form doesn't carry over to the next doctor
                                 key={`${selected.id}-${weekday}`}
-                                doctorId={selected.id}
                                 weekday={weekday}
                                 name={name}
                                 isToday={weekday === today}
                                 shifts={hours.filter((hour) => hour.weekday === weekday)}
+                                onAdd={(shift) => addShift(selected.id, shift)}
+                                onRemove={removeShift}
                             />
                         ))}
                     </ul>

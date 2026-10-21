@@ -1,7 +1,10 @@
 import { useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useFormik, type FormikErrors } from 'formik'
 import { useAuthStore } from '../../store/useAuthStore.ts'
+import { HomeRedirect } from '../../components/layout/privateRoutes.tsx'
+import GoogleSignIn from '../../components/googleSignIn.tsx'
+import { homePath } from '../../lib/homePath.ts'
 import { LuArrowRight } from 'react-icons/lu'
 import { PasswordInput } from './PasswordInput.tsx'
 import { useClock } from '../../hooks/useClock.ts'
@@ -53,8 +56,8 @@ export function Login() {
         onSubmit: async (values) => {
             setError(null)
             try {
-                await login({ email: values.email.trim(), password: values.password })
-                navigate('/dashboard', { replace: true })
+                const user = await login({ email: values.email.trim(), password: values.password })
+                navigate(homePath(user), { replace: true })
             } catch (err: unknown) {
                 // Credential errors stay in the general alert, never under one field,
                 // so the page doesn't reveal whether the email or the password was wrong
@@ -66,7 +69,7 @@ export function Login() {
 
     // Hooks above must always run, so this early return lives after them
     if (startedAuthed) {
-        return <Navigate to="/dashboard" replace />
+        return <HomeRedirect />
     }
 
     const { values, isSubmitting } = formik
@@ -84,7 +87,7 @@ export function Login() {
 
     return (
         <div className="relative flex min-h-dvh flex-col overflow-hidden bg-night text-white before:pointer-events-none before:absolute before:inset-0 before:bg-dots before:fade-down">
-            <AuthTopbar tone="dark" to="/register" hint="New patient?" label="Register" />
+            <AuthTopbar tone="dark" to="/auth/register" hint="New patient?" label="Register" />
 
             <div className="relative z-1 mx-auto grid w-full max-w-270 flex-1 items-center gap-10 px-4 pt-4 pb-8 min-[960px]:grid-cols-[1.05fr_0.95fr] min-[960px]:gap-16 min-[960px]:px-8 min-[960px]:pb-12">
                 <section>
@@ -169,7 +172,7 @@ export function Login() {
                                         Password
                                     </label>
                                     <Link
-                                        to="/forgot-password"
+                                        to="/auth/forgot-password"
                                         className="mb-[0.4rem] text-[0.8rem] font-semibold text-primary underline-offset-[3px] hover:underline"
                                     >
                                         Forgot password?
@@ -205,8 +208,17 @@ export function Login() {
                             </button>
                         </form>
 
+                        <GoogleSignIn
+                            text="signin_with"
+                            onSignedIn={(user) => navigate(homePath(user), { replace: true })}
+                            onError={(message) => {
+                                setError(message)
+                                setShake(true)
+                            }}
+                        />
+
                         <p className={cn('m-0 mt-5 text-center text-[0.9rem] text-copy-light', authInlineLink)}>
-                            First visit? <Link to="/register">Create free account</Link>
+                            First visit? <Link to="/auth/register">Create free account</Link>
                         </p>
                     </div>
 

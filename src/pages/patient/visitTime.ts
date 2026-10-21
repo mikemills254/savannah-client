@@ -25,6 +25,14 @@ export function staffName(appointment: IAppointment, person: IPerson | null): st
     return person.id === appointment.doctor.id ? appointment.doctor.name : person.name
 }
 
+// One-tap reasons offered when a patient cancels
+export const PATIENT_CANCEL_REASONS = [
+    "I'm feeling better",
+    "I can't make it at this time",
+    'I booked the wrong time',
+    "I'm seeing another doctor",
+]
+
 // Short code printed on the ticket stub, "7F3A2C"
 export function visitCode(appointment: IAppointment): string {
     return appointment.id.replace(/-/g, '').slice(0, 6).toUpperCase()

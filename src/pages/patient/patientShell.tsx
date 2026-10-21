@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { LuCalendarPlus, LuLogOut, LuTicket } from 'react-icons/lu'
+import LiveBadge from '../../components/live/liveBadge.tsx'
 import { cn } from '../../lib/cn.ts'
 import { initials } from '../../lib/initials.ts'
 import { useAuthStore } from '../../store/useAuthStore.ts'
@@ -27,7 +28,7 @@ export default function PatientShell({ children }: { children: ReactNode }) {
                     </Link>
 
                     <nav className="flex items-center gap-1" aria-label="Patient">
-                        <NavLink to="/dashboard" end className={navLink}>
+                        <NavLink to="/visits" end className={navLink}>
                             <LuTicket className="size-4" />
                             <span className="hidden sm:inline">My visits</span>
                         </NavLink>
@@ -37,6 +38,7 @@ export default function PatientShell({ children }: { children: ReactNode }) {
                         </NavLink>
                     </nav>
 
+                    <LiveBadge />
                     {user && (
                         <span
                             className="ml-1 hidden size-9 shrink-0 place-items-center rounded-full bg-primary text-sm font-semibold text-secondary sm:grid"

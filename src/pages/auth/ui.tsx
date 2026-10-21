@@ -54,7 +54,7 @@ export function AuthAlert({ children, tone = 'light', className = 'mb-5' }: Auth
         <div
             role="alert"
             className={cn(
-                'flex items-start gap-2.5 rounded-r-sm border-l-[3px] border-error px-3.5 py-3 text-left text-sm leading-[1.45]',
+                'flex items-start gap-2.5 rounded-r-sm px-3.5 py-3 text-left text-sm leading-[1.45]',
                 tone === 'dark' ? 'bg-error/15 text-[#ffb3b3]' : 'bg-error/8 text-error-ink',
                 className,
             )}

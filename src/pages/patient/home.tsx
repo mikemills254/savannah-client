@@ -2,13 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { LuArrowRight, LuRefreshCw, LuShieldCheck } from 'react-icons/lu'
-import { handleCancelAppointment, handleGetMyAppointments } from '../../api/booking.ts'
-import { unwrap } from '../../api/request.ts'
 import { Accent, Eyebrow } from '../../components/ui.tsx'
 import { useClock } from '../../hooks/useClock.ts'
-import type { IAuthUser } from '../../types/auth.types.ts'
-import type { IAppointment } from '../../types/facility.types.ts'
+import { useCurrentUser } from '../../hooks/useCurrentUser.ts'
 import PatientShell from './patientShell.tsx'
+import { usePatientStore } from './store/usePatientStore.ts'
 import VisitRow from './visitRow.tsx'
 import VisitTicket from './visitTicket.tsx'
 import { isUpcoming } from './visitTime.ts'
@@ -23,44 +21,44 @@ function greeting(now: Date): string {
     return 'Good evening'
 }
 
-type Load = { state: 'loading' } | { state: 'error'; message: string } | { state: 'ready' }
-
-export default function PatientHome({ user }: { user: IAuthUser }) {
+// /visits: the patient's home. Kept current by live updates, so a visit the
+// clinic books, moves or cancels for them shows up without a reload.
+export default function PatientHome() {
+    const user = useCurrentUser()
     const now = useClock(30_000)
-    const [load, setLoad] = useState<Load>({ state: 'loading' })
-    const [appointments, setAppointments] = useState<IAppointment[]>([])
-    const [stamped, setStamped] = useState<string | null>(null)
-    const [attempt, setAttempt] = useState(0)
+    const loadedFor = usePatientStore((s) => s.loadedFor)
+    const status = usePatientStore((s) => s.status)
+    const loadError = usePatientStore((s) => s.error)
+    const appointments = usePatientStore((s) => s.appointments)
+    const loadVisits = usePatientStore((s) => s.load)
+    const cancelVisit = usePatientStore((s) => s.cancel)
+    // A visit being cancelled stays where it is until its CANCELLED stamp has
+    // landed, even though the store (and any live update) already has it cancelled
+    const [leaving, setLeaving] = useState<{ id: string; stamped: boolean } | null>(null)
 
     useEffect(() => {
-        let cancelled = false
-        handleGetMyAppointments().then((response) => {
-            if (cancelled) return
-            if (response.success) {
-                setAppointments(response.data ?? [])
-                setLoad({ state: 'ready' })
-            } else {
-                setLoad({ state: 'error', message: response.message })
-            }
-        })
-        return () => {
-            cancelled = true
-        }
-    }, [attempt])
+        loadVisits(user.id)
+    }, [loadVisits, user.id])
+
+    // Data loaded for an earlier login isn't shown while this one's loads
+    const load = loadedFor !== user.id || status === 'loading' || status === 'idle' ? 'loading' : status
 
     const cancel = async (id: string, reason: string) => {
-        const updated = unwrap(await handleCancelAppointment(id, reason))
-        setStamped(id)
+        setLeaving({ id, stamped: false })
+        try {
+            await cancelVisit(id, reason)
+        } catch (error) {
+            setLeaving(null)
+            throw error
+        }
+        setLeaving({ id, stamped: true })
         toast.success('Cancelled. The slot is free for someone else now.')
         // Let the stamp land before the visit moves to history
-        window.setTimeout(() => {
-            setAppointments((list) => list.map((a) => (a.id === id ? updated : a)))
-            setStamped(null)
-        }, STAMP_MS)
+        window.setTimeout(() => setLeaving((current) => (current?.id === id ? null : current)), STAMP_MS)
     }
 
     const upcoming = appointments
-        .filter((a) => isUpcoming(a, now) || a.id === stamped)
+        .filter((a) => isUpcoming(a, now) || a.id === leaving?.id)
         .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
     const [next, ...later] = upcoming
     const history = appointments
@@ -78,7 +76,7 @@ export default function PatientHome({ user }: { user: IAuthUser }) {
                         {greeting(now)}, <Accent className="text-primary-light">{firstName}.</Accent>
                     </h1>
                     <p className="m-0 mt-2 text-copy-light">
-                        {load.state !== 'ready'
+                        {load !== 'ready'
                             ? 'Checking your bookings…'
                             : upcoming.length === 0
                               ? 'Nothing booked right now.'
@@ -92,32 +90,25 @@ export default function PatientHome({ user }: { user: IAuthUser }) {
             </div>
 
             <div className="mt-8">
-                {load.state === 'loading' && (
+                {load === 'loading' && (
                     <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]" aria-busy="true">
                         <div className="h-96 animate-pulse rounded-lg bg-white" />
                         <div className="h-64 animate-pulse rounded-lg bg-white" />
                     </div>
                 )}
 
-                {load.state === 'error' && (
+                {load === 'error' && (
                     <div className="rounded-lg border border-border bg-white px-6 py-12 text-center">
                         <p className="m-0 font-semibold text-copy">We couldn't load your visits</p>
-                        <p className="m-0 mt-1 text-sm text-copy-light">{load.message}</p>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setLoad({ state: 'loading' })
-                                setAttempt((n) => n + 1)
-                            }}
-                            className="btn btn-primary mt-5"
-                        >
+                        <p className="m-0 mt-1 text-sm text-copy-light">{loadError}</p>
+                        <button type="button" onClick={() => loadVisits(user.id)} className="btn btn-primary mt-5">
                             <LuRefreshCw className="size-4" />
                             Try again
                         </button>
                     </div>
                 )}
 
-                {load.state === 'ready' && (
+                {load === 'ready' && (
                     // minmax(0, …): truncated lines mustn't widen the columns past the screen
                     <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
                         <div className="flex flex-col gap-8">
@@ -126,7 +117,7 @@ export default function PatientHome({ user }: { user: IAuthUser }) {
                                     key={next.id}
                                     appointment={next}
                                     now={now}
-                                    stamped={stamped === next.id}
+                                    stamped={leaving?.id === next.id && leaving.stamped}
                                     onCancel={(reason) => cancel(next.id, reason)}
                                 />
                             ) : (

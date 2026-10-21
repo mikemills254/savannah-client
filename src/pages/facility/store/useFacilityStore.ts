@@ -8,17 +8,18 @@ import {
     handleGetWorkingHours,
     handleSetWorkingHours,
 } from '../../../api/facility.ts'
-import { handleCancelAppointment } from '../../../api/booking.ts'
+import { handleCancelAppointment, handleRescheduleAppointment } from '../../../api/booking.ts'
 import { unwrap } from '../../../api/request.ts'
+import { homeFacility } from '../../../lib/staffFacility.ts'
 import type { IAuthUser } from '../../../types/auth.types.ts'
 import type {
     IAppointment,
     IAppointmentBooked,
     IMember,
     IWorkingHour,
+    IWorkingHourInput,
     StaffRole,
 } from '../../../types/facility.types.ts'
-import { UserRole } from '../../../types/types.ts'
 import { clinicClock, DAY_MS } from '../utils/clinicTime.ts'
 
 // How much appointment history and future the facility pages work with
@@ -27,9 +28,9 @@ const DAYS_AHEAD = 60
 
 type Status = 'idle' | 'loading' | 'ready' | 'error'
 
-// The facility's data, shared by every facility page. Loaded once per signed-in
-// user by the page wrapper; each action is one request, and throws an ApiError
-// with the server's message when it fails.
+// The facility's data, shared by every facility admin page. Loaded once per
+// signed-in user by the page wrapper; each action is one request, and throws an
+// ApiError with the server's message when it fails.
 interface FacilityState {
     // The user the data was loaded for, so a different login reloads it
     loadedFor: string | null
@@ -40,14 +41,17 @@ interface FacilityState {
     workingHours: IWorkingHour[]
     appointments: IAppointment[]
     load: (user: IAuthUser) => Promise<void>
-    // Re-reads appointments, e.g. after another tab booked one
+    // Re-reads appointments, e.g. after the live connection dropped and events may have been missed
     refreshAppointments: () => Promise<void>
+    // An appointment as the server now has it, from a live update or a response
+    applyAppointment: (appointment: IAppointment) => void
     // Returns an invite token when they have never set a password
     addMember: (details: { name: string; email: string; role: StaffRole }) => Promise<string | null>
     setMemberActive: (id: string, isActive: boolean) => Promise<void>
-    addShift: (shift: Omit<IWorkingHour, 'id'>) => Promise<void>
+    addShift: (doctorId: string, shift: IWorkingHourInput) => Promise<void>
     removeShift: (id: string) => Promise<void>
     cancelAppointment: (id: string, reason: string) => Promise<void>
+    rescheduleAppointment: (id: string, startsAt: string) => Promise<void>
     bookForPatient: (
         booking: { doctor_id: string; starts_at: string; patient: { email: string; name?: string } },
         idempotencyKey: string,
@@ -78,11 +82,12 @@ function appointmentRange() {
 
 export const useFacilityStore = create<FacilityState>((set, get) => {
     // Replaces one doctor's week with the schedule the API saved
-    const saveDoctorHours = async (doctorId: string, hours: Omit<IWorkingHour, 'id'>[]) => {
+    const saveDoctorHours = async (doctorId: string, hours: IWorkingHourInput[]) => {
         const saved = unwrap(
             await handleSetWorkingHours(
                 requireFacility(),
                 doctorId,
+                // Saved shifts carry an id and doctor_id the API doesn't take back
                 hours.map(({ weekday, start_time, end_time }) => ({ weekday, start_time, end_time })),
             ),
         )
@@ -101,29 +106,15 @@ export const useFacilityStore = create<FacilityState>((set, get) => {
         appointments: [],
 
         load: async (user) => {
-            facilityId = user.facility_id
-            timeZone = user.facility?.timezone ?? 'UTC'
-            set({ loadedFor: user.id, facilityId: user.facility_id, status: 'loading', error: null })
+            const facility = homeFacility(user)
+            facilityId = facility?.id ?? null
+            timeZone = facility?.timezone ?? 'UTC'
+            set({ loadedFor: user.id, facilityId, status: 'loading', error: null })
 
             try {
                 const id = requireFacility()
-                // Doctors can't list the staff, and only need themselves on it
-                const members =
-                    user.role === UserRole.DOCTOR
-                        ? Promise.resolve<IMember[]>([
-                              {
-                                  id: user.id,
-                                  name: user.name,
-                                  email: user.email,
-                                  role: UserRole.DOCTOR,
-                                  is_active: user.is_active,
-                                  created_at: user.created_at,
-                              },
-                          ])
-                        : handleGetMembers(id).then(unwrap)
-
                 const [memberList, hours, appointments] = await Promise.all([
-                    members,
+                    handleGetMembers(id).then(unwrap),
                     handleGetWorkingHours(id).then(unwrap),
                     handleGetFacilityAppointments(id, appointmentRange()).then(unwrap),
                 ])
@@ -137,8 +128,17 @@ export const useFacilityStore = create<FacilityState>((set, get) => {
         },
 
         refreshAppointments: async () => {
+            const loadedFor = get().loadedFor
+            if (get().status !== 'ready') return
             const appointments = unwrap(await handleGetFacilityAppointments(requireFacility(), appointmentRange()))
+            if (get().loadedFor !== loadedFor) return
             set({ appointments })
+        },
+
+        applyAppointment: (appointment) => {
+            // Updates for another facility can't arrive, but a stale stream mustn't leak one in
+            if (appointment.facility.id !== get().facilityId) return
+            set((state) => ({ appointments: upsert(state.appointments, appointment) }))
         },
 
         addMember: async ({ name, email, role }) => {
@@ -160,9 +160,9 @@ export const useFacilityStore = create<FacilityState>((set, get) => {
             set((state) => ({ members: upsert(state.members, member) }))
         },
 
-        addShift: async (shift) => {
-            const own = get().workingHours.filter((hour) => hour.doctor_id === shift.doctor_id)
-            await saveDoctorHours(shift.doctor_id, [...own, shift])
+        addShift: async (doctorId, shift) => {
+            const own = get().workingHours.filter((hour) => hour.doctor_id === doctorId)
+            await saveDoctorHours(doctorId, [...own, shift])
         },
 
         removeShift: async (id) => {
@@ -174,6 +174,11 @@ export const useFacilityStore = create<FacilityState>((set, get) => {
 
         cancelAppointment: async (id, reason) => {
             const appointment = unwrap(await handleCancelAppointment(id, reason))
+            set((state) => ({ appointments: upsert(state.appointments, appointment) }))
+        },
+
+        rescheduleAppointment: async (id, startsAt) => {
+            const appointment = unwrap(await handleRescheduleAppointment(id, startsAt))
             set((state) => ({ appointments: upsert(state.appointments, appointment) }))
         },
 

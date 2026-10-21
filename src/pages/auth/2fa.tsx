@@ -2,6 +2,7 @@ import { useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEve
 import { Link, useLocation } from 'react-router-dom'
 import { LuArrowRight } from 'react-icons/lu'
 import { useClock } from '../../hooks/useClock.ts'
+import { useHomePath } from '../../hooks/useHomePath.ts'
 import { maskEmail } from './utils.ts'
 import { cn } from '../../lib/cn.ts'
 import { Accent, Eyebrow } from '../../components/ui.tsx'
@@ -37,6 +38,7 @@ export function TwoFactor() {
     const [issuedAt, setIssuedAt] = useState(() => Date.now())
     const inputs = useRef<(HTMLInputElement | null)[]>([])
     const now = useClock()
+    const home = useHomePath()
 
     const focusAt = (i: number) => inputs.current[Math.max(0, Math.min(CODE_LENGTH - 1, i))]?.focus()
 
@@ -121,7 +123,7 @@ export function TwoFactor() {
 
     return (
         <div className="relative flex min-h-dvh flex-col overflow-hidden bg-night text-white before:pointer-events-none before:absolute before:inset-0 before:bg-dots before:fade-down">
-            <AuthTopbar tone="dark" to="/login" hint="Not you?" label="Log in again" />
+            <AuthTopbar tone="dark" to="/auth/login" hint="Not you?" label="Log in again" />
 
             <div className="relative z-1 grid flex-1 place-items-center px-4 pt-4 pb-8">
                 <main className={cn('w-full max-w-[520px] text-center', authRise)}>
@@ -204,7 +206,7 @@ export function TwoFactor() {
                         )}
 
                         {verified ? (
-                            <Link to="/dashboard" className={otpSubmit}>
+                            <Link to={home} className={otpSubmit}>
                                 Continue to dashboard
                                 <LuArrowRight size={18} />
                             </Link>
